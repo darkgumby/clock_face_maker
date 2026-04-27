@@ -1,0 +1,9 @@
+clock_face_maker.code-workspace
+
+# Node.js
+node_modules/
+dist/
+.DS_Store
+
+.claude/
+.mcp.json
