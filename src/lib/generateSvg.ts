@@ -1,13 +1,34 @@
 const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
 
 export type FaceShape = "circle" | "square" | "rounded_square";
-function squareEdgeIntersect(cx: number, cy: number, h: number, angle: number): [number, number] {
+function squareEdgeIntersect(cx: number, cy: number, h: number, r: number, angle: number): [number, number] {
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
   const tx = Math.abs(cos) > 1e-10 ? h / Math.abs(cos) : Infinity;
   const ty = Math.abs(sin) > 1e-10 ? h / Math.abs(sin) : Infinity;
-  const t = Math.min(tx, ty);
-  return [cx + t * cos, cy + t * sin];
+
+  if (r <= 0) {
+    return [cx + Math.min(tx, ty) * cos, cy + Math.min(tx, ty) * sin];
+  }
+
+  // Check if flat-edge intersection lands in the flat portion (not corner zone)
+  if (tx <= ty) {
+    const y = sin * tx;
+    if (Math.abs(y) <= h - r) return [cx + cos * tx, cy + sin * tx];
+  } else {
+    const x = cos * ty;
+    if (Math.abs(x) <= h - r) return [cx + cos * ty, cy + sin * ty];
+  }
+
+  // Corner arc intersection
+  const acx = cx + Math.sign(cos) * (h - r);
+  const acy = cy + Math.sign(sin) * (h - r);
+  const dx = cx - acx, dy = cy - acy;
+  const b = 2 * (dx * cos + dy * sin);
+  const c = dx * dx + dy * dy - r * r;
+  const disc = b * b - 4 * c;
+  const t = (-b + Math.sqrt(Math.max(0, disc))) / 2;
+  return [cx + cos * t, cy + sin * t];
 }
 
 interface SvgParams {
@@ -89,9 +110,11 @@ export function generateSvg(params: SvgParams): string {
     );
   }
 
+  const innerCornerRadius = Math.max(0, cornerRadius - borderWidth);
   const markStart = (a: number, ca: number, sa: number): [number, number] => {
     if (faceShape !== "circle") {
-      const [ex, ey] = squareEdgeIntersect(cx, cy, innerRadius, a);
+      const cr = faceShape === "rounded_square" ? innerCornerRadius : 0;
+      const [ex, ey] = squareEdgeIntersect(cx, cy, innerRadius, cr, a);
       return [ex - markBorderGap * ca, ey - markBorderGap * sa];
     }
     return [cx + markOuterRadius * ca, cy + markOuterRadius * sa];
