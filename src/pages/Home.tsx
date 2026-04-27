@@ -4,6 +4,7 @@ import MarksPanel from "../components/MarksPanel";
 import FontPanel from "../components/FontPanel";
 import ProjectSidebar from "../components/ProjectSidebar";
 import SvgPreview from "../components/SvgPreview";
+import CollapsiblePanel from "../components/CollapsiblePanel";
 import { generateSvg } from "../lib/generateSvg";
 import { useProjects, type ProjectRecord } from "../hooks/useProjects";
 import { useSettings, UnitPreference } from "../hooks/useSettings";
@@ -161,15 +162,17 @@ export default function Home() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-900 text-gray-100">
-      <ProjectSidebar
-        projects={projects}
-        loading={projectsLoading || settingsLoading}
-        currentProject={currentProject}
-        onSelect={handleSelectProject}
-        onCreate={createProject}
-        onDelete={deleteProject}
-        projectsError={projectsError}
-      />
+      <CollapsiblePanel title="Projects" borderSide="left">
+        <ProjectSidebar
+          projects={projects}
+          loading={projectsLoading || settingsLoading}
+          currentProject={currentProject}
+          onSelect={handleSelectProject}
+          onCreate={createProject}
+          onDelete={deleteProject}
+          projectsError={projectsError}
+        />
+      </CollapsiblePanel>
 
       <SvgPreview
         svgContent={svgContent}
@@ -177,7 +180,7 @@ export default function Home() {
         svgError={svgError}
       />
 
-      <div className="flex flex-col w-64 shrink-0 bg-gray-800 border-l border-gray-700 h-screen overflow-hidden">
+      <CollapsiblePanel title="Face" borderSide="right">
         <ParameterPanel
           params={params}
           onChange={handleParamsChange}
@@ -185,20 +188,24 @@ export default function Home() {
           unitPreference={unitPreference}
           onSetUnitPreference={handleUnitPreferenceChange}
         />
-      </div>
+      </CollapsiblePanel>
 
-      <MarksPanel
-        params={params}
-        onChange={handleParamsChange}
-        unitPreference={unitPreference}
-      />
+      <CollapsiblePanel title="Marks" borderSide="right">
+        <MarksPanel
+          params={params}
+          onChange={handleParamsChange}
+          unitPreference={unitPreference}
+        />
+      </CollapsiblePanel>
 
-      <FontPanel
-        params={params}
-        onChange={handleParamsChange}
-        defaultFont={defaultFont}
-        onSetDefaultFont={setDefaultFont}
-      />
+      <CollapsiblePanel title="Font" borderSide="right" width="w-56">
+        <FontPanel
+          params={params}
+          onChange={handleParamsChange}
+          defaultFont={defaultFont}
+          onSetDefaultFont={setDefaultFont}
+        />
+      </CollapsiblePanel>
 
       {allErrors && (
         <div className="absolute bottom-4 left-4 right-4 p-2 bg-red-500 text-white rounded text-center">

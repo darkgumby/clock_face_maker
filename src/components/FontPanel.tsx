@@ -61,8 +61,7 @@ export default function FontPanel({ params, onChange, onSetDefaultFont }: FontPa
   const previewLabel = params.number_roman ? "XII" : "12";
 
   return (
-    <div className="flex flex-col w-56 shrink-0 bg-gray-800 border-l border-gray-700 h-screen overflow-hidden">
-      <div className="p-4 flex flex-col gap-y-4 overflow-y-auto h-full">
+    <div className="p-4 flex flex-col gap-y-4">
 
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Font</h3>
 
@@ -96,7 +95,6 @@ fontSize: `${Math.max(16, Math.min(params.number_size * 1.5, 48))}px`,
           {previewLabel}
         </div>
 
-      </div>
     </div>
   );
 }

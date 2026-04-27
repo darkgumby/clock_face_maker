@@ -46,7 +46,7 @@ const ProjectSidebar: FC<ProjectSidebarProps> = ({
   };
 
   return (
-    <aside className="w-64 shrink-0 bg-gray-800 border-r border-gray-700 p-4 flex flex-col overflow-y-auto h-screen">
+    <div className="p-4 flex flex-col">
       <h2 className="text-lg font-semibold mb-4">Projects</h2>
 
       {!isCreatingProject ? (
@@ -85,7 +85,7 @@ const ProjectSidebar: FC<ProjectSidebarProps> = ({
           {projects.length === 0 && <p className="text-gray-400 text-sm">No projects yet.</p>}
         </ul>
       )}
-    </aside>
+    </div>
   );
 };
 

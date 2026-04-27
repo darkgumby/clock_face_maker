@@ -31,7 +31,7 @@ const ParameterPanel: FC<ParameterPanelProps> = ({
   const [lockDimensions, setLockDimensions] = useState(true);
 
   return (
-    <div className="p-4 flex flex-col gap-y-4 overflow-y-auto h-full">
+    <div className="p-4 flex flex-col gap-y-4">
       {/* Unit Switcher */}
       <div className="flex flex-col gap-y-1">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Units</h3>

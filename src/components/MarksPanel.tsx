@@ -21,8 +21,7 @@ interface MarksPanelProps {
 }
 
 const MarksPanel: FC<MarksPanelProps> = ({ params, onChange, unitPreference }) => (
-  <div className="flex flex-col w-64 shrink-0 bg-gray-800 border-l border-gray-700 h-screen overflow-hidden">
-    <div className="p-4 flex flex-col gap-y-4 overflow-y-auto h-full">
+  <div className="p-4 flex flex-col gap-y-4">
 
       <div className="flex flex-col gap-y-2">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Numbers</h3>
@@ -110,7 +109,6 @@ const MarksPanel: FC<MarksPanelProps> = ({ params, onChange, unitPreference }) =
           </>
         )}
       </div>
-    </div>
   </div>
 );
 
