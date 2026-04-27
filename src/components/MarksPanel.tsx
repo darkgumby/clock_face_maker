@@ -4,6 +4,9 @@ import { BooleanToggle, ColorInput, UnitInputRange } from "./PanelControls";
 
 interface MarksPanelProps {
   params: {
+    show_numbers: boolean;
+    cardinal_numbers_only: boolean;
+    number_mark_gap: number;
     mark_color: string;
     mark_border_gap: number;
     hour_mark_length: number;
@@ -20,6 +23,32 @@ interface MarksPanelProps {
 const MarksPanel: FC<MarksPanelProps> = ({ params, onChange, unitPreference }) => (
   <div className="flex flex-col w-64 shrink-0 bg-gray-800 border-l border-gray-700 h-screen overflow-hidden">
     <div className="p-4 flex flex-col gap-y-4 overflow-y-auto h-full">
+
+      <div className="flex flex-col gap-y-2">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Numbers</h3>
+        <BooleanToggle
+          label="Show Numbers"
+          value={params.show_numbers}
+          onChange={(v) => onChange({ show_numbers: v })}
+        />
+        {params.show_numbers && (
+          <BooleanToggle
+            label="Cardinal Numbers Only"
+            value={params.cardinal_numbers_only}
+            onChange={(v) => onChange({ cardinal_numbers_only: v })}
+          />
+        )}
+        {params.show_numbers && (
+          <UnitInputRange
+            label="Gap to Marks"
+            value={params.number_mark_gap}
+            onChange={(v) => onChange({ number_mark_gap: v })}
+            minMm={-10} maxMm={40} stepMm={1}
+            unit={unitPreference}
+          />
+        )}
+      </div>
+
       <div className="flex flex-col gap-y-2">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Marks</h3>
         <ColorInput
