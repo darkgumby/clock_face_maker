@@ -1,7 +1,7 @@
 import { type FC } from "react";
 import ColorPicker from "./ColorPicker";
 import { UnitPreference } from "../hooks/useSettings";
-import { type FaceShape, type MarkPlacement } from "../lib/generateSvg";
+import { type FaceShape } from "../lib/generateSvg";
 
 const MM_PER_INCH = 25.4;
 
@@ -42,7 +42,6 @@ interface ParameterPanelProps {
     number_font_weight: number;
     number_font_italic: boolean;
     center_hole_diameter: number;
-    mark_placement: MarkPlacement;
     mark_border_gap: number;
   };
   onChange: (params: Partial<ParameterPanelProps["params"]>) => void;
@@ -190,25 +189,6 @@ const ParameterPanel: FC<ParameterPanelProps> = ({
             onChange={(v) => onChange({ corner_radius: v })}
             min={0} max={80} step={1}
           />
-        )}
-        {params.face_shape !== "circle" && (
-          <div className="flex items-center justify-between text-sm">
-            <label className="text-gray-300">Mark Placement</label>
-            <div className="flex p-1 rounded-md bg-gray-700">
-              {(["radial", "perimeter"] as MarkPlacement[]).map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => onChange({ mark_placement: p })}
-                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                    params.mark_placement === p ? "bg-blue-500 text-white" : "text-gray-300 hover:bg-gray-600"
-                  }`}
-                >
-                  {p.charAt(0).toUpperCase() + p.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
         )}
         <ColorInput
           label="Face Color"
