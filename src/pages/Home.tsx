@@ -35,6 +35,8 @@ const DEFAULT_PARAMS = {
   cardinal_marks_only: false,
   cardinal_numbers_only: false,
   mark_round_ends: true,
+  mark_style: "line" as import("../lib/generateSvg").MarkStyle,
+  mark_circle_diameter: 4,
   mark_border_gap: 2,
 };
 

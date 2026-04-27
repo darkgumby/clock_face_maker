@@ -1,6 +1,7 @@
 import { type FC } from "react";
 import { UnitPreference } from "../hooks/useSettings";
-import { BooleanToggle, ColorInput, UnitInputRange } from "./PanelControls";
+import { BooleanToggle, ColorInput, InputRange, UnitInputRange } from "./PanelControls";
+import { type MarkStyle } from "../lib/generateSvg";
 
 interface MarksPanelProps {
   params: {
@@ -13,6 +14,8 @@ interface MarksPanelProps {
     hour_mark_width: number;
     cardinal_marks_only: boolean;
     mark_round_ends: boolean;
+    mark_style: MarkStyle;
+    mark_circle_diameter: number;
     show_minute_marks: boolean;
     minute_mark_length: number;
     minute_mark_width: number;
@@ -82,11 +85,38 @@ const MarksPanel: FC<MarksPanelProps> = ({ params, onChange, unitPreference }) =
           value={params.cardinal_marks_only}
           onChange={(v) => onChange({ cardinal_marks_only: v })}
         />
-        <BooleanToggle
-          label="Rounded Ends"
-          value={params.mark_round_ends}
-          onChange={(v) => onChange({ mark_round_ends: v })}
-        />
+        <div className="flex flex-col gap-y-1 text-sm">
+          <label className="text-gray-300">Mark Style</label>
+          <div className="flex p-1 rounded-md bg-gray-700">
+            {(["line", "circle"] as MarkStyle[]).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => onChange({ mark_style: s })}
+                className={`flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                  params.mark_style === s ? "bg-blue-500 text-white" : "text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+        {params.mark_style === "line" && (
+          <BooleanToggle
+            label="Rounded Ends"
+            value={params.mark_round_ends}
+            onChange={(v) => onChange({ mark_round_ends: v })}
+          />
+        )}
+        {params.mark_style === "circle" && (
+          <InputRange
+            label="Circle Diameter"
+            value={params.mark_circle_diameter}
+            onChange={(v) => onChange({ mark_circle_diameter: v })}
+            min={1} max={20} step={0.5}
+          />
+        )}
       </div>
 
       <div className="flex flex-col gap-y-2">
