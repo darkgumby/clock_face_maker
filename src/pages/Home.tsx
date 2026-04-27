@@ -9,6 +9,8 @@ import { useSettings, UnitPreference } from "../hooks/useSettings";
 
 const DEFAULT_PARAMS = {
   diameter: 250,
+  face_shape: "circle" as import("../lib/generateSvg").FaceShape,
+  corner_radius: 20,
   face_color: "#ffffff",
   border_color: "#ffffff",
   border_width: 5,

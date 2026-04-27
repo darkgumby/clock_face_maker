@@ -1,6 +1,7 @@
 import { type FC } from "react";
 import ColorPicker from "./ColorPicker";
 import { UnitPreference } from "../hooks/useSettings";
+import { type FaceShape } from "../lib/generateSvg";
 
 const MM_PER_INCH = 25.4;
 
@@ -22,6 +23,8 @@ function toFractionInches(inches: number): string {
 interface ParameterPanelProps {
   params: {
     diameter: number;
+    face_shape: FaceShape;
+    corner_radius: number;
     face_color: string;
     border_color: string;
     border_width: number;
@@ -161,6 +164,31 @@ const ParameterPanel: FC<ParameterPanelProps> = ({
           minMm={100} maxMm={600} stepMm={10}
           unit={unitPreference}
         />
+        <div className="flex flex-col gap-y-1 text-sm">
+          <label className="text-gray-300">Shape</label>
+          <div className="flex p-1 rounded-md bg-gray-700">
+            {(["circle", "square", "rounded_square"] as FaceShape[]).map((shape) => (
+              <button
+                key={shape}
+                type="button"
+                onClick={() => onChange({ face_shape: shape })}
+                className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
+                  params.face_shape === shape ? "bg-blue-500 text-white" : "text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                {shape === "circle" ? "Circle" : shape === "square" ? "Square" : "Rounded"}
+              </button>
+            ))}
+          </div>
+        </div>
+        {params.face_shape === "rounded_square" && (
+          <InputRange
+            label="Corner Radius"
+            value={params.corner_radius}
+            onChange={(v) => onChange({ corner_radius: v })}
+            min={0} max={80} step={1}
+          />
+        )}
         <ColorInput
           label="Face Color"
           value={params.face_color}

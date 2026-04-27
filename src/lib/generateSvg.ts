@@ -1,7 +1,11 @@
 const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
 
+export type FaceShape = "circle" | "square" | "rounded_square";
+
 interface SvgParams {
   diameter?: number;
+  face_shape?: FaceShape;
+  corner_radius?: number;
   face_color?: string;
   border_color?: string;
   border_width?: number;
@@ -27,6 +31,8 @@ export function generateSvg(params: SvgParams): string {
   const radius = diameter / 2;
   const cx = radius, cy = radius;
 
+  const faceShape = params.face_shape ?? "circle";
+  const cornerRadius = params.corner_radius ?? 20;
   const faceColor = params.face_color ?? "#ffffff";
   const borderColor = params.border_color ?? "#000000";
   const borderWidth = params.border_width ?? 4;
@@ -60,9 +66,17 @@ export function generateSvg(params: SvgParams): string {
 
   const els: string[] = [];
 
-  els.push(
-    `<circle cx="${cx}" cy="${cy}" r="${radius - borderWidth / 2}" fill="${faceColor}" stroke="${borderColor}" stroke-width="${borderWidth}"/>`
-  );
+  if (faceShape === "circle") {
+    els.push(
+      `<circle cx="${cx}" cy="${cy}" r="${radius - borderWidth / 2}" fill="${faceColor}" stroke="${borderColor}" stroke-width="${borderWidth}"/>`
+    );
+  } else {
+    const rx = faceShape === "rounded_square" ? cornerRadius : 0;
+    const inset = borderWidth / 2;
+    els.push(
+      `<rect x="${inset}" y="${inset}" width="${diameter - borderWidth}" height="${diameter - borderWidth}" rx="${rx}" ry="${rx}" fill="${faceColor}" stroke="${borderColor}" stroke-width="${borderWidth}"/>`
+    );
+  }
 
   if (showMinuteMarks) {
     const effectiveMinuteMarkLength = Math.min(minuteMarkLength, Math.max(1, effectiveHourMarkLength - 2));
