@@ -23,6 +23,8 @@ function toFractionInches(inches: number): string {
 interface ParameterPanelProps {
   params: {
     diameter: number;
+    face_width: number;
+    face_height: number;
     face_shape: FaceShape;
     corner_radius: number;
     face_color: string;
@@ -158,13 +160,32 @@ const ParameterPanel: FC<ParameterPanelProps> = ({
       {/* Parameters */}
       <div className="flex flex-col gap-y-2">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Clock Face</h3>
-        <UnitInputRange
-          label="Diameter"
-          value={diameterMm}
-          onChange={(v) => onChange({ diameter: v })}
-          minMm={100} maxMm={600} stepMm={10}
-          unit={unitPreference}
-        />
+        {params.face_shape === "circle" ? (
+          <UnitInputRange
+            label="Diameter"
+            value={diameterMm}
+            onChange={(v) => onChange({ diameter: v })}
+            minMm={100} maxMm={600} stepMm={10}
+            unit={unitPreference}
+          />
+        ) : (
+          <>
+            <UnitInputRange
+              label="Width"
+              value={params.face_width}
+              onChange={(v) => onChange({ face_width: v })}
+              minMm={100} maxMm={600} stepMm={10}
+              unit={unitPreference}
+            />
+            <UnitInputRange
+              label="Height"
+              value={params.face_height}
+              onChange={(v) => onChange({ face_height: v })}
+              minMm={100} maxMm={600} stepMm={10}
+              unit={unitPreference}
+            />
+          </>
+        )}
         <div className="flex flex-col gap-y-1 text-sm">
           <label className="text-gray-300">Shape</label>
           <div className="flex p-1 rounded-md bg-gray-700">

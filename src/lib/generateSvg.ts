@@ -33,6 +33,8 @@ function squareEdgeIntersect(cx: number, cy: number, h: number, r: number, angle
 
 interface SvgParams {
   diameter?: number;
+  face_width?: number;
+  face_height?: number;
   face_shape?: FaceShape;
   corner_radius?: number;
   face_color?: string;
@@ -57,11 +59,12 @@ interface SvgParams {
 }
 
 export function generateSvg(params: SvgParams): string {
-  const diameter = params.diameter ?? 300;
-  const radius = diameter / 2;
-  const cx = radius, cy = radius;
-
   const faceShape = params.face_shape ?? "circle";
+  const diameter = params.diameter ?? 300;
+  const svgWidth = faceShape === "circle" ? diameter : (params.face_width ?? diameter);
+  const svgHeight = faceShape === "circle" ? diameter : (params.face_height ?? diameter);
+  const cx = svgWidth / 2, cy = svgHeight / 2;
+
   const cornerRadius = params.corner_radius ?? 20;
   const faceColor = params.face_color ?? "#ffffff";
   const borderColor = params.border_color ?? "#000000";
@@ -86,7 +89,7 @@ export function generateSvg(params: SvgParams): string {
   const cardinalMarksOnly = params.cardinal_marks_only ?? false;
   const markBorderGap = params.mark_border_gap ?? 2;
 
-  const innerRadius = radius - borderWidth;
+  const innerRadius = Math.min(svgWidth, svgHeight) / 2 - borderWidth;
   const markOuterRadius = innerRadius - markBorderGap;
 
   const minNumRadius = centerHoleDiameter / 2 + numberSize / 2 + 4;
@@ -99,6 +102,7 @@ export function generateSvg(params: SvgParams): string {
   const els: string[] = [];
 
   if (faceShape === "circle") {
+    const radius = diameter / 2;
     els.push(
       `<circle cx="${cx}" cy="${cy}" r="${radius - borderWidth / 2}" fill="${faceColor}" stroke="${borderColor}" stroke-width="${borderWidth}"/>`
     );
@@ -106,7 +110,7 @@ export function generateSvg(params: SvgParams): string {
     const rx = faceShape === "rounded_square" ? cornerRadius : 0;
     const inset = borderWidth / 2;
     els.push(
-      `<rect x="${inset}" y="${inset}" width="${diameter - borderWidth}" height="${diameter - borderWidth}" rx="${rx}" ry="${rx}" fill="${faceColor}" stroke="${borderColor}" stroke-width="${borderWidth}"/>`
+      `<rect x="${inset}" y="${inset}" width="${svgWidth - borderWidth}" height="${svgHeight - borderWidth}" rx="${rx}" ry="${rx}" fill="${faceColor}" stroke="${borderColor}" stroke-width="${borderWidth}"/>`
     );
   }
 
@@ -152,5 +156,5 @@ export function generateSvg(params: SvgParams): string {
     `<circle cx="${cx}" cy="${cy}" r="${centerHoleDiameter / 2}" fill="#000000"/>`
   );
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${diameter}px" height="${diameter}px" viewBox="0 0 ${diameter} ${diameter}">\n${els.join("\n")}\n</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}px" height="${svgHeight}px" viewBox="0 0 ${svgWidth} ${svgHeight}">\n${els.join("\n")}\n</svg>`;
 }
