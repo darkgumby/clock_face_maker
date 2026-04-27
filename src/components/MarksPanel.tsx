@@ -93,14 +93,14 @@ const MarksPanel: FC<MarksPanelProps> = ({ params, onChange, unitPreference }) =
         {params.show_minute_marks && (
           <>
             <UnitInputRange
-              label="Length"
+              label="Minute Mark Length"
               value={params.minute_mark_length}
               onChange={(v) => onChange({ minute_mark_length: v })}
               minMm={1} maxMm={15} stepMm={1}
               unit={unitPreference}
             />
             <UnitInputRange
-              label="Width"
+              label="Minute Mark Width"
               value={params.minute_mark_width}
               onChange={(v) => onChange({ minute_mark_width: v })}
               minMm={0.5} maxMm={3} stepMm={0.5}
