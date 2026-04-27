@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import ParameterPanel from "../components/ParameterPanel";
+import MarksPanel from "../components/MarksPanel";
 import FontPanel from "../components/FontPanel";
 import ProjectSidebar from "../components/ProjectSidebar";
 import SvgPreview from "../components/SvgPreview";
@@ -184,6 +185,12 @@ export default function Home() {
           onSetUnitPreference={handleUnitPreferenceChange}
         />
       </div>
+
+      <MarksPanel
+        params={params}
+        onChange={handleParamsChange}
+        unitPreference={unitPreference}
+      />
 
       <FontPanel
         params={params}
