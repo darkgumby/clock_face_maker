@@ -1,4 +1,4 @@
-import { type FC } from "react";
+import { type FC, useState } from "react";
 import ColorPicker from "./ColorPicker";
 import { UnitPreference } from "../hooks/useSettings";
 import { type FaceShape } from "../lib/generateSvg";
@@ -103,6 +103,8 @@ const ParameterPanel: FC<ParameterPanelProps> = ({
   unitPreference,
   onSetUnitPreference,
 }) => {
+  const [lockDimensions, setLockDimensions] = useState(true);
+
   const handleUnitChange = (unit: UnitPreference) => {
     onSetUnitPreference(unit);
   };
@@ -170,17 +172,22 @@ const ParameterPanel: FC<ParameterPanelProps> = ({
           />
         ) : (
           <>
+            <BooleanToggle
+              label="Lock Dimensions"
+              value={lockDimensions}
+              onChange={setLockDimensions}
+            />
             <UnitInputRange
               label="Width"
               value={params.face_width}
-              onChange={(v) => onChange({ face_width: v })}
+              onChange={(v) => onChange(lockDimensions ? { face_width: v, face_height: v } : { face_width: v })}
               minMm={100} maxMm={600} stepMm={10}
               unit={unitPreference}
             />
             <UnitInputRange
               label="Height"
               value={params.face_height}
-              onChange={(v) => onChange({ face_height: v })}
+              onChange={(v) => onChange(lockDimensions ? { face_width: v, face_height: v } : { face_height: v })}
               minMm={100} maxMm={600} stepMm={10}
               unit={unitPreference}
             />
