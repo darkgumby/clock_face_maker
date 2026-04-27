@@ -29,6 +29,7 @@ const DEFAULT_PARAMS = {
   number_mark_gap: 16,
   center_hole_diameter: 8,
   cardinal_marks_only: false,
+  mark_placement: "radial" as import("../lib/generateSvg").MarkPlacement,
 };
 
 type Params = typeof DEFAULT_PARAMS;

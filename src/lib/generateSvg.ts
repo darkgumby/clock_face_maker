@@ -1,6 +1,16 @@
 const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
 
 export type FaceShape = "circle" | "square" | "rounded_square";
+export type MarkPlacement = "radial" | "perimeter";
+
+function squareEdgeIntersect(cx: number, cy: number, h: number, angle: number): [number, number] {
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  const tx = Math.abs(cos) > 1e-10 ? h / Math.abs(cos) : Infinity;
+  const ty = Math.abs(sin) > 1e-10 ? h / Math.abs(sin) : Infinity;
+  const t = Math.min(tx, ty);
+  return [cx + t * cos, cy + t * sin];
+}
 
 interface SvgParams {
   diameter?: number;
@@ -24,6 +34,7 @@ interface SvgParams {
   number_mark_gap?: number;
   center_hole_diameter?: number;
   cardinal_marks_only?: boolean;
+  mark_placement?: MarkPlacement;
 }
 
 export function generateSvg(params: SvgParams): string {
@@ -54,6 +65,8 @@ export function generateSvg(params: SvgParams): string {
   const numberMarkGap = params.number_mark_gap ?? 16;
   const centerHoleDiameter = params.center_hole_diameter ?? 8;
   const cardinalMarksOnly = params.cardinal_marks_only ?? false;
+  const markPlacement = params.mark_placement ?? "radial";
+  const usePerimeter = markPlacement === "perimeter" && faceShape !== "circle";
 
   const innerRadius = radius - borderWidth;
 
@@ -84,8 +97,15 @@ export function generateSvg(params: SvgParams): string {
       if (i % 5 === 0) continue;
       const a = ((i * 6 - 90) * Math.PI) / 180;
       const ca = Math.cos(a), sa = Math.sin(a);
+      let x1: number, y1: number;
+      if (usePerimeter) {
+        [x1, y1] = squareEdgeIntersect(cx, cy, innerRadius, a);
+      } else {
+        x1 = cx + innerRadius * ca;
+        y1 = cy + innerRadius * sa;
+      }
       els.push(
-        `<line x1="${cx + innerRadius * ca}" y1="${cy + innerRadius * sa}" x2="${cx + (innerRadius - effectiveMinuteMarkLength) * ca}" y2="${cy + (innerRadius - effectiveMinuteMarkLength) * sa}" stroke="${markColor}" stroke-width="${minuteMarkWidth}" stroke-linecap="round"/>`
+        `<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveMinuteMarkLength * ca}" y2="${y1 - effectiveMinuteMarkLength * sa}" stroke="${markColor}" stroke-width="${minuteMarkWidth}" stroke-linecap="round"/>`
       );
     }
   }
@@ -94,8 +114,15 @@ export function generateSvg(params: SvgParams): string {
     if (cardinalMarksOnly && i % 3 !== 0) continue;
     const a = ((i * 30 - 90) * Math.PI) / 180;
     const ca = Math.cos(a), sa = Math.sin(a);
+    let x1: number, y1: number;
+    if (usePerimeter) {
+      [x1, y1] = squareEdgeIntersect(cx, cy, innerRadius, a);
+    } else {
+      x1 = cx + innerRadius * ca;
+      y1 = cy + innerRadius * sa;
+    }
     els.push(
-      `<line x1="${cx + innerRadius * ca}" y1="${cy + innerRadius * sa}" x2="${cx + (innerRadius - effectiveHourMarkLength) * ca}" y2="${cy + (innerRadius - effectiveHourMarkLength) * sa}" stroke="${markColor}" stroke-width="${hourMarkWidth}" stroke-linecap="round"/>`
+      `<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveHourMarkLength * ca}" y2="${y1 - effectiveHourMarkLength * sa}" stroke="${markColor}" stroke-width="${hourMarkWidth}" stroke-linecap="round"/>`
     );
   }
 
