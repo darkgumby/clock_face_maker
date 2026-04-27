@@ -175,7 +175,10 @@ const ParameterPanel: FC<ParameterPanelProps> = ({
             <BooleanToggle
               label="Lock Dimensions"
               value={lockDimensions}
-              onChange={setLockDimensions}
+              onChange={(v) => {
+                setLockDimensions(v);
+                if (v) onChange({ face_height: params.face_width });
+              }}
             />
             <UnitInputRange
               label="Width"
