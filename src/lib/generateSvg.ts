@@ -35,6 +35,7 @@ interface SvgParams {
   center_hole_diameter?: number;
   cardinal_marks_only?: boolean;
   mark_placement?: MarkPlacement;
+  mark_border_gap?: number;
 }
 
 export function generateSvg(params: SvgParams): string {
@@ -67,15 +68,17 @@ export function generateSvg(params: SvgParams): string {
   const cardinalMarksOnly = params.cardinal_marks_only ?? false;
   const markPlacement = params.mark_placement ?? "radial";
   const usePerimeter = markPlacement === "perimeter" && faceShape !== "circle";
+  const markBorderGap = params.mark_border_gap ?? 0;
 
   const innerRadius = radius - borderWidth;
+  const markOuterRadius = innerRadius - markBorderGap;
 
   const minNumRadius = centerHoleDiameter / 2 + numberSize / 2 + 4;
   // Only auto-shrink marks when gap is positive (user-set gap is honored; negatives allow overlap)
   const effectiveHourMarkLength = showNumbers && numberMarkGap >= 0
-    ? Math.max(1, Math.min(hourMarkLength, innerRadius - minNumRadius - numberMarkGap))
+    ? Math.max(1, Math.min(hourMarkLength, markOuterRadius - minNumRadius - numberMarkGap))
     : hourMarkLength;
-  const numRadius = innerRadius - effectiveHourMarkLength - numberMarkGap;
+  const numRadius = markOuterRadius - effectiveHourMarkLength - numberMarkGap;
 
   const els: string[] = [];
 
@@ -100,9 +103,11 @@ export function generateSvg(params: SvgParams): string {
       let x1: number, y1: number;
       if (usePerimeter) {
         [x1, y1] = squareEdgeIntersect(cx, cy, innerRadius, a);
+        x1 -= markBorderGap * ca;
+        y1 -= markBorderGap * sa;
       } else {
-        x1 = cx + innerRadius * ca;
-        y1 = cy + innerRadius * sa;
+        x1 = cx + markOuterRadius * ca;
+        y1 = cy + markOuterRadius * sa;
       }
       els.push(
         `<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveMinuteMarkLength * ca}" y2="${y1 - effectiveMinuteMarkLength * sa}" stroke="${markColor}" stroke-width="${minuteMarkWidth}" stroke-linecap="round"/>`
@@ -117,9 +122,11 @@ export function generateSvg(params: SvgParams): string {
     let x1: number, y1: number;
     if (usePerimeter) {
       [x1, y1] = squareEdgeIntersect(cx, cy, innerRadius, a);
+      x1 -= markBorderGap * ca;
+      y1 -= markBorderGap * sa;
     } else {
-      x1 = cx + innerRadius * ca;
-      y1 = cy + innerRadius * sa;
+      x1 = cx + markOuterRadius * ca;
+      y1 = cy + markOuterRadius * sa;
     }
     els.push(
       `<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveHourMarkLength * ca}" y2="${y1 - effectiveHourMarkLength * sa}" stroke="${markColor}" stroke-width="${hourMarkWidth}" stroke-linecap="round"/>`

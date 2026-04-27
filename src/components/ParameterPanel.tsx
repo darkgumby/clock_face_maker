@@ -43,6 +43,7 @@ interface ParameterPanelProps {
     number_font_italic: boolean;
     center_hole_diameter: number;
     mark_placement: MarkPlacement;
+    mark_border_gap: number;
   };
   onChange: (params: Partial<ParameterPanelProps["params"]>) => void;
   currentProject: any;
@@ -241,6 +242,13 @@ const ParameterPanel: FC<ParameterPanelProps> = ({
           label="Mark Color"
           value={params.mark_color}
           onChange={(v) => onChange({ mark_color: v })}
+        />
+        <UnitInputRange
+          label="Border Gap"
+          value={params.mark_border_gap}
+          onChange={(v) => onChange({ mark_border_gap: v })}
+          minMm={0} maxMm={20} stepMm={0.5}
+          unit={unitPreference}
         />
         <UnitInputRange
           label="Hour Mark Length"
