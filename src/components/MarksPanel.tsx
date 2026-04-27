@@ -35,13 +35,13 @@ interface MarksPanelProps {
 const StyleSelector: FC<{ label: string; value: MarkStyle; onChange: (v: MarkStyle) => void }> = ({ label, value, onChange }) => (
   <div className="flex flex-col gap-y-1 text-sm">
     <label className="text-gray-300">{label}</label>
-    <div className="flex p-1 rounded-md bg-gray-700">
+    <div className="grid grid-cols-2 gap-1 p-1 rounded-md bg-gray-700">
       {(["line", "circle", "square", "diamond"] as MarkStyle[]).map((s) => (
         <button
           key={s}
           type="button"
           onClick={() => onChange(s)}
-          className={`flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+          className={`px-2 py-1 text-xs font-medium rounded-md transition-colors ${
             value === s ? "bg-blue-500 text-white" : "text-gray-300 hover:bg-gray-600"
           }`}
         >
