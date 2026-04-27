@@ -6,7 +6,7 @@ A parametric clock face designer that outputs SVG files, with project management
 
 - **Parametric Design:** Adjust diameter, colors, border, mark lengths, font, and number style.
 - **Live SVG Preview:** Changes reflect instantly — no debounce, no network call.
-- **Zoom/Pan:** Mouse wheel zoom on the clock preview.
+- **Zoom:** Mouse wheel zoom on the clock preview.
 - **Project Management:** Create and switch between multiple projects. Last selected project is remembered.
 - **Snapshots:** Save and restore parameter states per project.
 - **SVG Download:** Export your clock face as an SVG file.
@@ -19,9 +19,17 @@ A parametric clock face designer that outputs SVG files, with project management
 
 ## Getting Started
 
+### Local dev
+
 ```bash
 npm install
 npm run dev   # http://localhost:5173
+```
+
+### Docker
+
+```bash
+docker compose up --build   # http://localhost:8080
 ```
 
 

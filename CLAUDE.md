@@ -39,6 +39,14 @@ npm install
 npm run dev       # http://localhost:5173
 ```
 
+### Docker
+
+```sh
+docker compose up --build   # http://localhost:8080
+docker compose up --build -d  # detached
+docker compose down
+```
+
 ## Key Parameters
 
 | Parameter | Default | Description |
