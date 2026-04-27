@@ -36,7 +36,7 @@ const StyleSelector: FC<{ label: string; value: MarkStyle; onChange: (v: MarkSty
   <div className="flex flex-col gap-y-1 text-sm">
     <label className="text-gray-300">{label}</label>
     <div className="flex p-1 rounded-md bg-gray-700">
-      {(["line", "circle"] as MarkStyle[]).map((s) => (
+      {(["line", "circle", "square", "diamond"] as MarkStyle[]).map((s) => (
         <button
           key={s}
           type="button"
