@@ -110,13 +110,7 @@ export function generateSvg(params: SvgParams): string {
     );
   }
 
-  const innerCornerRadius = Math.max(0, cornerRadius - borderWidth);
-  const markStart = (a: number, ca: number, sa: number): [number, number] => {
-    if (faceShape !== "circle") {
-      const cr = faceShape === "rounded_square" ? innerCornerRadius : 0;
-      const [ex, ey] = squareEdgeIntersect(cx, cy, innerRadius, cr, a);
-      return [ex - markBorderGap * ca, ey - markBorderGap * sa];
-    }
+  const markStart = (_a: number, ca: number, sa: number): [number, number] => {
     return [cx + markOuterRadius * ca, cy + markOuterRadius * sa];
   };
 
