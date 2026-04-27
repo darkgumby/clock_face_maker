@@ -68,7 +68,7 @@ export function generateSvg(params: SvgParams): string {
   const cardinalMarksOnly = params.cardinal_marks_only ?? false;
   const markPlacement = params.mark_placement ?? "radial";
   const usePerimeter = markPlacement === "perimeter" && faceShape !== "circle";
-  const markBorderGap = params.mark_border_gap ?? 0;
+  const markBorderGap = params.mark_border_gap ?? 2;
 
   const innerRadius = radius - borderWidth;
   const markOuterRadius = innerRadius - markBorderGap;
