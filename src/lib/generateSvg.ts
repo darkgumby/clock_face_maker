@@ -59,8 +59,10 @@ interface SvgParams {
   cardinal_numbers_only?: boolean;
   mark_border_gap?: number;
   mark_round_ends?: boolean;
-  mark_style?: MarkStyle;
-  mark_circle_diameter?: number;
+  hour_mark_style?: MarkStyle;
+  hour_mark_circle_diameter?: number;
+  minute_mark_style?: MarkStyle;
+  minute_mark_circle_diameter?: number;
 }
 
 export function generateSvg(params: SvgParams): string {
@@ -95,8 +97,10 @@ export function generateSvg(params: SvgParams): string {
   const cardinalNumbersOnly = params.cardinal_numbers_only ?? false;
   const markBorderGap = params.mark_border_gap ?? 2;
   const markLinecap = (params.mark_round_ends ?? true) ? "round" : "butt";
-  const markStyle = params.mark_style ?? "line";
-  const markCircleRadius = (params.mark_circle_diameter ?? 4) / 2;
+  const hourMarkStyle = params.hour_mark_style ?? "line";
+  const hourMarkCircleRadius = (params.hour_mark_circle_diameter ?? 4) / 2;
+  const minuteMarkStyle = params.minute_mark_style ?? "line";
+  const minuteMarkCircleRadius = (params.minute_mark_circle_diameter ?? 3) / 2;
 
   const innerRadius = Math.min(svgWidth, svgHeight) / 2 - borderWidth;
   const markOuterRadius = innerRadius - markBorderGap;
@@ -134,9 +138,9 @@ export function generateSvg(params: SvgParams): string {
       const a = ((i * 6 - 90) * Math.PI) / 180;
       const ca = Math.cos(a), sa = Math.sin(a);
       const [x1, y1] = markStart(a, ca, sa);
-      if (markStyle === "circle") {
-        const ccx = x1 - markCircleRadius * ca, ccy = y1 - markCircleRadius * sa;
-        els.push(`<circle cx="${ccx}" cy="${ccy}" r="${markCircleRadius}" fill="${markColor}"/>`);
+      if (minuteMarkStyle === "circle") {
+        const ccx = x1 - minuteMarkCircleRadius * ca, ccy = y1 - minuteMarkCircleRadius * sa;
+        els.push(`<circle cx="${ccx}" cy="${ccy}" r="${minuteMarkCircleRadius}" fill="${markColor}"/>`);
       } else {
         els.push(`<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveMinuteMarkLength * ca}" y2="${y1 - effectiveMinuteMarkLength * sa}" stroke="${markColor}" stroke-width="${minuteMarkWidth}" stroke-linecap="${markLinecap}"/>`);
       }
@@ -148,9 +152,9 @@ export function generateSvg(params: SvgParams): string {
     const a = ((i * 30 - 90) * Math.PI) / 180;
     const ca = Math.cos(a), sa = Math.sin(a);
     const [x1, y1] = markStart(a, ca, sa);
-    if (markStyle === "circle") {
-      const ccx = x1 - markCircleRadius * ca, ccy = y1 - markCircleRadius * sa;
-      els.push(`<circle cx="${ccx}" cy="${ccy}" r="${markCircleRadius}" fill="${markColor}"/>`);
+    if (hourMarkStyle === "circle") {
+      const ccx = x1 - hourMarkCircleRadius * ca, ccy = y1 - hourMarkCircleRadius * sa;
+      els.push(`<circle cx="${ccx}" cy="${ccy}" r="${hourMarkCircleRadius}" fill="${markColor}"/>`);
     } else {
       els.push(`<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveHourMarkLength * ca}" y2="${y1 - effectiveHourMarkLength * sa}" stroke="${markColor}" stroke-width="${hourMarkWidth}" stroke-linecap="${markLinecap}"/>`);
     }

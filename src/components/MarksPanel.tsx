@@ -14,15 +14,37 @@ interface MarksPanelProps {
     hour_mark_width: number;
     cardinal_marks_only: boolean;
     mark_round_ends: boolean;
-    mark_style: MarkStyle;
-    mark_circle_diameter: number;
+    hour_mark_style: MarkStyle;
+    hour_mark_circle_diameter: number;
     show_minute_marks: boolean;
     minute_mark_length: number;
     minute_mark_width: number;
+    minute_mark_style: MarkStyle;
+    minute_mark_circle_diameter: number;
   };
   onChange: (params: Partial<MarksPanelProps["params"]>) => void;
   unitPreference: UnitPreference;
 }
+
+const StyleSelector: FC<{ label: string; value: MarkStyle; onChange: (v: MarkStyle) => void }> = ({ label, value, onChange }) => (
+  <div className="flex flex-col gap-y-1 text-sm">
+    <label className="text-gray-300">{label}</label>
+    <div className="flex p-1 rounded-md bg-gray-700">
+      {(["line", "circle"] as MarkStyle[]).map((s) => (
+        <button
+          key={s}
+          type="button"
+          onClick={() => onChange(s)}
+          className={`flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+            value === s ? "bg-blue-500 text-white" : "text-gray-300 hover:bg-gray-600"
+          }`}
+        >
+          {s.charAt(0).toUpperCase() + s.slice(1)}
+        </button>
+      ))}
+    </div>
+  </div>
+);
 
 const MarksPanel: FC<MarksPanelProps> = ({ params, onChange, unitPreference }) => (
   <div className="p-4 flex flex-col gap-y-4">
@@ -85,35 +107,23 @@ const MarksPanel: FC<MarksPanelProps> = ({ params, onChange, unitPreference }) =
           value={params.cardinal_marks_only}
           onChange={(v) => onChange({ cardinal_marks_only: v })}
         />
-        <div className="flex flex-col gap-y-1 text-sm">
-          <label className="text-gray-300">Mark Style</label>
-          <div className="flex p-1 rounded-md bg-gray-700">
-            {(["line", "circle"] as MarkStyle[]).map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => onChange({ mark_style: s })}
-                className={`flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                  params.mark_style === s ? "bg-blue-500 text-white" : "text-gray-300 hover:bg-gray-600"
-                }`}
-              >
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
-        {params.mark_style === "line" && (
+        <StyleSelector
+          label="Hour Mark Style"
+          value={params.hour_mark_style}
+          onChange={(v) => onChange({ hour_mark_style: v })}
+        />
+        {params.hour_mark_style === "line" && (
           <BooleanToggle
             label="Rounded Ends"
             value={params.mark_round_ends}
             onChange={(v) => onChange({ mark_round_ends: v })}
           />
         )}
-        {params.mark_style === "circle" && (
+        {params.hour_mark_style === "circle" && (
           <InputRange
             label="Circle Diameter"
-            value={params.mark_circle_diameter}
-            onChange={(v) => onChange({ mark_circle_diameter: v })}
+            value={params.hour_mark_circle_diameter}
+            onChange={(v) => onChange({ hour_mark_circle_diameter: v })}
             min={1} max={20} step={0.5}
           />
         )}
@@ -128,20 +138,36 @@ const MarksPanel: FC<MarksPanelProps> = ({ params, onChange, unitPreference }) =
         />
         {params.show_minute_marks && (
           <>
-            <UnitInputRange
-              label="Minute Mark Length"
-              value={params.minute_mark_length}
-              onChange={(v) => onChange({ minute_mark_length: v })}
-              minMm={1} maxMm={15} stepMm={1}
-              unit={unitPreference}
+            <StyleSelector
+              label="Minute Mark Style"
+              value={params.minute_mark_style}
+              onChange={(v) => onChange({ minute_mark_style: v })}
             />
-            <UnitInputRange
-              label="Minute Mark Width"
-              value={params.minute_mark_width}
-              onChange={(v) => onChange({ minute_mark_width: v })}
-              minMm={0.5} maxMm={3} stepMm={0.5}
-              unit={unitPreference}
-            />
+            {params.minute_mark_style === "circle" ? (
+              <InputRange
+                label="Circle Diameter"
+                value={params.minute_mark_circle_diameter}
+                onChange={(v) => onChange({ minute_mark_circle_diameter: v })}
+                min={1} max={15} step={0.5}
+              />
+            ) : (
+              <>
+                <UnitInputRange
+                  label="Minute Mark Length"
+                  value={params.minute_mark_length}
+                  onChange={(v) => onChange({ minute_mark_length: v })}
+                  minMm={1} maxMm={15} stepMm={1}
+                  unit={unitPreference}
+                />
+                <UnitInputRange
+                  label="Minute Mark Width"
+                  value={params.minute_mark_width}
+                  onChange={(v) => onChange({ minute_mark_width: v })}
+                  minMm={0.5} maxMm={3} stepMm={0.5}
+                  unit={unitPreference}
+                />
+              </>
+            )}
           </>
         )}
       </div>
