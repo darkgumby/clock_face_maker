@@ -16,11 +16,17 @@ interface MarksPanelProps {
     mark_round_ends: boolean;
     hour_mark_style: MarkStyle;
     hour_mark_circle_diameter: number;
+    hour_mark_square_size: number;
+    hour_mark_diamond_width: number;
+    hour_mark_diamond_height: number;
     show_minute_marks: boolean;
     minute_mark_length: number;
     minute_mark_width: number;
     minute_mark_style: MarkStyle;
     minute_mark_circle_diameter: number;
+    minute_mark_square_size: number;
+    minute_mark_diamond_width: number;
+    minute_mark_diamond_height: number;
   };
   onChange: (params: Partial<MarksPanelProps["params"]>) => void;
   unitPreference: UnitPreference;
@@ -120,13 +126,19 @@ const MarksPanel: FC<MarksPanelProps> = ({ params, onChange, unitPreference }) =
           />
         )}
         {params.hour_mark_style === "circle" && (
-          <InputRange
-            label="Circle Diameter"
-            value={params.hour_mark_circle_diameter}
-            onChange={(v) => onChange({ hour_mark_circle_diameter: v })}
-            min={1} max={20} step={0.5}
-          />
+          <InputRange label="Circle Diameter" value={params.hour_mark_circle_diameter}
+            onChange={(v) => onChange({ hour_mark_circle_diameter: v })} min={1} max={20} step={0.5} />
         )}
+        {params.hour_mark_style === "square" && (
+          <InputRange label="Square Size" value={params.hour_mark_square_size}
+            onChange={(v) => onChange({ hour_mark_square_size: v })} min={1} max={20} step={0.5} />
+        )}
+        {params.hour_mark_style === "diamond" && (<>
+          <InputRange label="Diamond Width" value={params.hour_mark_diamond_width}
+            onChange={(v) => onChange({ hour_mark_diamond_width: v })} min={1} max={20} step={0.5} />
+          <InputRange label="Diamond Height" value={params.hour_mark_diamond_height}
+            onChange={(v) => onChange({ hour_mark_diamond_height: v })} min={1} max={30} step={0.5} />
+        </>)}
       </div>
 
       <div className="flex flex-col gap-y-2">
@@ -143,31 +155,26 @@ const MarksPanel: FC<MarksPanelProps> = ({ params, onChange, unitPreference }) =
               value={params.minute_mark_style}
               onChange={(v) => onChange({ minute_mark_style: v })}
             />
-            {params.minute_mark_style === "circle" ? (
-              <InputRange
-                label="Circle Diameter"
-                value={params.minute_mark_circle_diameter}
-                onChange={(v) => onChange({ minute_mark_circle_diameter: v })}
-                min={1} max={15} step={0.5}
-              />
-            ) : (
-              <>
-                <UnitInputRange
-                  label="Minute Mark Length"
-                  value={params.minute_mark_length}
-                  onChange={(v) => onChange({ minute_mark_length: v })}
-                  minMm={1} maxMm={15} stepMm={1}
-                  unit={unitPreference}
-                />
-                <UnitInputRange
-                  label="Minute Mark Width"
-                  value={params.minute_mark_width}
-                  onChange={(v) => onChange({ minute_mark_width: v })}
-                  minMm={0.5} maxMm={3} stepMm={0.5}
-                  unit={unitPreference}
-                />
-              </>
+            {params.minute_mark_style === "line" && (<>
+              <UnitInputRange label="Minute Mark Length" value={params.minute_mark_length}
+                onChange={(v) => onChange({ minute_mark_length: v })} minMm={1} maxMm={15} stepMm={1} unit={unitPreference} />
+              <UnitInputRange label="Minute Mark Width" value={params.minute_mark_width}
+                onChange={(v) => onChange({ minute_mark_width: v })} minMm={0.5} maxMm={3} stepMm={0.5} unit={unitPreference} />
+            </>)}
+            {params.minute_mark_style === "circle" && (
+              <InputRange label="Circle Diameter" value={params.minute_mark_circle_diameter}
+                onChange={(v) => onChange({ minute_mark_circle_diameter: v })} min={1} max={15} step={0.5} />
             )}
+            {params.minute_mark_style === "square" && (
+              <InputRange label="Square Size" value={params.minute_mark_square_size}
+                onChange={(v) => onChange({ minute_mark_square_size: v })} min={1} max={15} step={0.5} />
+            )}
+            {params.minute_mark_style === "diamond" && (<>
+              <InputRange label="Diamond Width" value={params.minute_mark_diamond_width}
+                onChange={(v) => onChange({ minute_mark_diamond_width: v })} min={1} max={15} step={0.5} />
+              <InputRange label="Diamond Height" value={params.minute_mark_diamond_height}
+                onChange={(v) => onChange({ minute_mark_diamond_height: v })} min={1} max={20} step={0.5} />
+            </>)}
           </>
         )}
       </div>

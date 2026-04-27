@@ -1,7 +1,7 @@
 const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
 
 export type FaceShape = "circle" | "square" | "rounded_square";
-export type MarkStyle = "line" | "circle";
+export type MarkStyle = "line" | "circle" | "square" | "diamond";
 function squareEdgeIntersect(cx: number, cy: number, h: number, r: number, angle: number): [number, number] {
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
@@ -30,6 +30,13 @@ function squareEdgeIntersect(cx: number, cy: number, h: number, r: number, angle
   const disc = b * b - 4 * c;
   const t = (-b + Math.sqrt(Math.max(0, disc))) / 2;
   return [cx + cos * t, cy + sin * t];
+}
+
+function markPolygon(ccx: number, ccy: number, ca: number, sa: number, localPts: [number, number][], fill: string): string {
+  const pts = localPts.map(([lx, ly]) =>
+    `${(ccx + lx * (-sa) + ly * ca).toFixed(2)},${(ccy + lx * ca + ly * sa).toFixed(2)}`
+  ).join(" ");
+  return `<polygon points="${pts}" fill="${fill}"/>`;
 }
 
 interface SvgParams {
@@ -61,8 +68,14 @@ interface SvgParams {
   mark_round_ends?: boolean;
   hour_mark_style?: MarkStyle;
   hour_mark_circle_diameter?: number;
+  hour_mark_square_size?: number;
+  hour_mark_diamond_width?: number;
+  hour_mark_diamond_height?: number;
   minute_mark_style?: MarkStyle;
   minute_mark_circle_diameter?: number;
+  minute_mark_square_size?: number;
+  minute_mark_diamond_width?: number;
+  minute_mark_diamond_height?: number;
 }
 
 export function generateSvg(params: SvgParams): string {
@@ -99,8 +112,14 @@ export function generateSvg(params: SvgParams): string {
   const markLinecap = (params.mark_round_ends ?? true) ? "round" : "butt";
   const hourMarkStyle = params.hour_mark_style ?? "line";
   const hourMarkCircleRadius = (params.hour_mark_circle_diameter ?? 4) / 2;
+  const hourMarkSquareSize = params.hour_mark_square_size ?? 5;
+  const hourMarkDiamondW = params.hour_mark_diamond_width ?? 5;
+  const hourMarkDiamondH = params.hour_mark_diamond_height ?? 8;
   const minuteMarkStyle = params.minute_mark_style ?? "line";
   const minuteMarkCircleRadius = (params.minute_mark_circle_diameter ?? 3) / 2;
+  const minuteMarkSquareSize = params.minute_mark_square_size ?? 3;
+  const minuteMarkDiamondW = params.minute_mark_diamond_width ?? 3;
+  const minuteMarkDiamondH = params.minute_mark_diamond_height ?? 5;
 
   const innerRadius = Math.min(svgWidth, svgHeight) / 2 - borderWidth;
   const markOuterRadius = innerRadius - markBorderGap;
@@ -141,6 +160,12 @@ export function generateSvg(params: SvgParams): string {
       if (minuteMarkStyle === "circle") {
         const ccx = x1 - minuteMarkCircleRadius * ca, ccy = y1 - minuteMarkCircleRadius * sa;
         els.push(`<circle cx="${ccx}" cy="${ccy}" r="${minuteMarkCircleRadius}" fill="${markColor}"/>`);
+      } else if (minuteMarkStyle === "square") {
+        const s = minuteMarkSquareSize, ccx = x1 - s / 2 * ca, ccy = y1 - s / 2 * sa;
+        els.push(markPolygon(ccx, ccy, ca, sa, [[-s/2,-s/2],[s/2,-s/2],[s/2,s/2],[-s/2,s/2]], markColor));
+      } else if (minuteMarkStyle === "diamond") {
+        const ccx = x1 - minuteMarkDiamondH / 2 * ca, ccy = y1 - minuteMarkDiamondH / 2 * sa;
+        els.push(markPolygon(ccx, ccy, ca, sa, [[0,minuteMarkDiamondH/2],[minuteMarkDiamondW/2,0],[0,-minuteMarkDiamondH/2],[-minuteMarkDiamondW/2,0]], markColor));
       } else {
         els.push(`<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveMinuteMarkLength * ca}" y2="${y1 - effectiveMinuteMarkLength * sa}" stroke="${markColor}" stroke-width="${minuteMarkWidth}" stroke-linecap="${markLinecap}"/>`);
       }
@@ -155,6 +180,12 @@ export function generateSvg(params: SvgParams): string {
     if (hourMarkStyle === "circle") {
       const ccx = x1 - hourMarkCircleRadius * ca, ccy = y1 - hourMarkCircleRadius * sa;
       els.push(`<circle cx="${ccx}" cy="${ccy}" r="${hourMarkCircleRadius}" fill="${markColor}"/>`);
+    } else if (hourMarkStyle === "square") {
+      const s = hourMarkSquareSize, ccx = x1 - s / 2 * ca, ccy = y1 - s / 2 * sa;
+      els.push(markPolygon(ccx, ccy, ca, sa, [[-s/2,-s/2],[s/2,-s/2],[s/2,s/2],[-s/2,s/2]], markColor));
+    } else if (hourMarkStyle === "diamond") {
+      const ccx = x1 - hourMarkDiamondH / 2 * ca, ccy = y1 - hourMarkDiamondH / 2 * sa;
+      els.push(markPolygon(ccx, ccy, ca, sa, [[0,hourMarkDiamondH/2],[hourMarkDiamondW/2,0],[0,-hourMarkDiamondH/2],[-hourMarkDiamondW/2,0]], markColor));
     } else {
       els.push(`<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveHourMarkLength * ca}" y2="${y1 - effectiveHourMarkLength * sa}" stroke="${markColor}" stroke-width="${hourMarkWidth}" stroke-linecap="${markLinecap}"/>`);
     }

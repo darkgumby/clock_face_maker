@@ -37,8 +37,14 @@ const DEFAULT_PARAMS = {
   mark_round_ends: true,
   hour_mark_style: "line" as import("../lib/generateSvg").MarkStyle,
   hour_mark_circle_diameter: 4,
+  hour_mark_square_size: 5,
+  hour_mark_diamond_width: 5,
+  hour_mark_diamond_height: 8,
   minute_mark_style: "line" as import("../lib/generateSvg").MarkStyle,
   minute_mark_circle_diameter: 3,
+  minute_mark_square_size: 3,
+  minute_mark_diamond_width: 3,
+  minute_mark_diamond_height: 5,
   mark_border_gap: 2,
 };
 
