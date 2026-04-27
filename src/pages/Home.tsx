@@ -34,6 +34,7 @@ const DEFAULT_PARAMS = {
   center_hole_diameter: 8,
   cardinal_marks_only: false,
   cardinal_numbers_only: false,
+  mark_round_ends: true,
   mark_border_gap: 2,
 };
 

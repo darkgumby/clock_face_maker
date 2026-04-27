@@ -12,6 +12,7 @@ interface MarksPanelProps {
     hour_mark_length: number;
     hour_mark_width: number;
     cardinal_marks_only: boolean;
+    mark_round_ends: boolean;
     show_minute_marks: boolean;
     minute_mark_length: number;
     minute_mark_width: number;
@@ -80,6 +81,11 @@ const MarksPanel: FC<MarksPanelProps> = ({ params, onChange, unitPreference }) =
           label="Cardinal Marks Only"
           value={params.cardinal_marks_only}
           onChange={(v) => onChange({ cardinal_marks_only: v })}
+        />
+        <BooleanToggle
+          label="Rounded Ends"
+          value={params.mark_round_ends}
+          onChange={(v) => onChange({ mark_round_ends: v })}
         />
       </div>
 

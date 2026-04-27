@@ -57,6 +57,7 @@ interface SvgParams {
   cardinal_marks_only?: boolean;
   cardinal_numbers_only?: boolean;
   mark_border_gap?: number;
+  mark_round_ends?: boolean;
 }
 
 export function generateSvg(params: SvgParams): string {
@@ -90,6 +91,7 @@ export function generateSvg(params: SvgParams): string {
   const cardinalMarksOnly = params.cardinal_marks_only ?? false;
   const cardinalNumbersOnly = params.cardinal_numbers_only ?? false;
   const markBorderGap = params.mark_border_gap ?? 2;
+  const markLinecap = (params.mark_round_ends ?? true) ? "round" : "butt";
 
   const innerRadius = Math.min(svgWidth, svgHeight) / 2 - borderWidth;
   const markOuterRadius = innerRadius - markBorderGap;
@@ -128,7 +130,7 @@ export function generateSvg(params: SvgParams): string {
       const ca = Math.cos(a), sa = Math.sin(a);
       const [x1, y1] = markStart(a, ca, sa);
       els.push(
-        `<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveMinuteMarkLength * ca}" y2="${y1 - effectiveMinuteMarkLength * sa}" stroke="${markColor}" stroke-width="${minuteMarkWidth}" stroke-linecap="round"/>`
+        `<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveMinuteMarkLength * ca}" y2="${y1 - effectiveMinuteMarkLength * sa}" stroke="${markColor}" stroke-width="${minuteMarkWidth}" stroke-linecap="${markLinecap}"/>`
       );
     }
   }
@@ -139,7 +141,7 @@ export function generateSvg(params: SvgParams): string {
     const ca = Math.cos(a), sa = Math.sin(a);
     const [x1, y1] = markStart(a, ca, sa);
     els.push(
-      `<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveHourMarkLength * ca}" y2="${y1 - effectiveHourMarkLength * sa}" stroke="${markColor}" stroke-width="${hourMarkWidth}" stroke-linecap="round"/>`
+      `<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveHourMarkLength * ca}" y2="${y1 - effectiveHourMarkLength * sa}" stroke="${markColor}" stroke-width="${hourMarkWidth}" stroke-linecap="${markLinecap}"/>`
     );
   }
 
