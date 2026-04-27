@@ -14,6 +14,7 @@ interface ParameterPanelProps {
     border_color: string;
     border_width: number;
     show_numbers: boolean;
+    cardinal_numbers_only: boolean;
     number_mark_gap: number;
     number_font: string;
     number_size: number;
@@ -173,6 +174,13 @@ const ParameterPanel: FC<ParameterPanelProps> = ({
           value={params.show_numbers}
           onChange={(v) => onChange({ show_numbers: v })}
         />
+        {params.show_numbers && (
+          <BooleanToggle
+            label="Cardinal Numbers Only"
+            value={params.cardinal_numbers_only}
+            onChange={(v) => onChange({ cardinal_numbers_only: v })}
+          />
+        )}
         {params.show_numbers && (
           <UnitInputRange
             label="Gap to Marks"

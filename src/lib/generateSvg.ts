@@ -55,6 +55,7 @@ interface SvgParams {
   number_mark_gap?: number;
   center_hole_diameter?: number;
   cardinal_marks_only?: boolean;
+  cardinal_numbers_only?: boolean;
   mark_border_gap?: number;
 }
 
@@ -87,6 +88,7 @@ export function generateSvg(params: SvgParams): string {
   const numberMarkGap = params.number_mark_gap ?? 16;
   const centerHoleDiameter = params.center_hole_diameter ?? 8;
   const cardinalMarksOnly = params.cardinal_marks_only ?? false;
+  const cardinalNumbersOnly = params.cardinal_numbers_only ?? false;
   const markBorderGap = params.mark_border_gap ?? 2;
 
   const innerRadius = Math.min(svgWidth, svgHeight) / 2 - borderWidth;
@@ -143,7 +145,7 @@ export function generateSvg(params: SvgParams): string {
 
   if (showNumbers) {
     for (let i = 1; i <= 12; i++) {
-
+      if (cardinalNumbersOnly && i % 3 !== 0) continue;
       const a = ((i * 30 - 90) * Math.PI) / 180;
       const label = numberRoman ? ROMAN[i - 1] : String(i);
       els.push(
