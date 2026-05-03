@@ -40,20 +40,45 @@ export const GOOGLE_FONTS: string[] = [
   "Source Code Pro", "Space Mono", "Ubuntu Mono", "VT323",
 ].sort();
 
-// Track which font families have already been injected as <link> elements
-const _loaded = new Set<string>();
+const FONT_WEIGHTS = "ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900";
 
-function loadGoogleFonts(names: string[]) {
-  const toLoad = names.filter((n) => !_loaded.has(n));
+// Individual per-font CSS links with tracked Promises — used by select() so a
+// failed or oversized batch can never silently block a font from loading.
+const _fontReady = new Map<string, Promise<void>>();
+
+function getFontReadyPromise(font: string): Promise<void> {
+  if (!_fontReady.has(font)) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:${FONT_WEIGHTS}&display=swap`;
+    const p = new Promise<void>((res) => {
+      link.onload = () => res();
+      link.onerror = () => res();
+      document.head.appendChild(link);
+    });
+    _fontReady.set(font, p);
+  }
+  return _fontReady.get(font)!;
+}
+
+// Fonts already queued via batch links (fire-and-forget preloading).
+const _batchSeen = new Set<string>();
+
+// Batch-loads fonts for dropdown preview. Chunked at 20 to avoid URL limits.
+function loadGoogleFonts(names: string[]): void {
+  const toLoad = names.filter((n) => !_batchSeen.has(n) && !_fontReady.has(n));
   if (toLoad.length === 0) return;
-  toLoad.forEach((n) => _loaded.add(n));
-  const families = toLoad
-    .map((n) => `family=${encodeURIComponent(n)}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900`)
-    .join("&");
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = `https://fonts.googleapis.com/css2?${families}&display=swap`;
-  document.head.appendChild(link);
+  toLoad.forEach((n) => _batchSeen.add(n));
+  const CHUNK = 20;
+  for (let i = 0; i < toLoad.length; i += CHUNK) {
+    const families = toLoad.slice(i, i + CHUNK)
+      .map((n) => `family=${encodeURIComponent(n)}:${FONT_WEIGHTS}`)
+      .join("&");
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?${families}&display=swap`;
+    document.head.appendChild(link);
+  }
 }
 
 interface FontPickerProps {
@@ -99,9 +124,16 @@ export default function FontPicker({ value, onChange }: FontPickerProps) {
   }, [open]);
 
   const select = (font: string) => {
-    onChange(font);
     setOpen(false);
     setQuery("");
+    // Phase 1: wait for the individual per-font CSS link so @font-face rules are
+    // registered (not the batch link, which can fail at large URL sizes).
+    // Phase 2: wait for the actual font file via document.fonts.load().
+    // Race with 3s timeout so slow/failed network still propagates the change.
+    const fontReady = getFontReadyPromise(font)
+      .then(() => document.fonts.load(`400 16px "${font}"`));
+    const timeout = new Promise<void>((res) => setTimeout(res, 3000));
+    Promise.race([fontReady, timeout]).then(() => onChange(font), () => onChange(font));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

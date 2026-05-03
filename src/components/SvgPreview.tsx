@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useZoom } from "../hooks/useZoomPan";
+import { useMemo, useState } from "react";
+import { useZoom } from "../hooks/useZoom";
 import { type UnitPreference } from "../hooks/useSettings";
 
 const MM_PER_INCH = 25.4;
@@ -80,17 +80,15 @@ export default function SvgPreview({ svgContent, onDownloadSvg, svgError, downlo
     return showGrid ? buildGridSvg(svgContent, unitPreference) : svgContent;
   }, [svgContent, showGrid, unitPreference]);
 
-  const blobUrl = useMemo(() => {
+  // Inject CSS sizing so inline SVG is constrained by its container instead of
+  // rendering at physical mm dimensions (which can be huge on high-DPI screens).
+  const inlineSvg = useMemo(() => {
     if (!displaySvg) return null;
-    const blob = new Blob([displaySvg], { type: "image/svg+xml" });
-    return URL.createObjectURL(blob);
+    return displaySvg.replace(
+      /<svg /,
+      '<svg style="max-width:100%;max-height:calc(100vh - 6rem);height:auto;" '
+    );
   }, [displaySvg]);
-
-  const prevUrl = useRef<string | null>(null);
-  useEffect(() => {
-    if (prevUrl.current) URL.revokeObjectURL(prevUrl.current);
-    prevUrl.current = blobUrl;
-  }, [blobUrl]);
 
   return (
     <div className="flex-1 flex flex-col items-stretch bg-gray-300 relative overflow-hidden">
@@ -128,17 +126,14 @@ export default function SvgPreview({ svgContent, onDownloadSvg, svgError, downlo
           </div>
         )}
         {!svgError && svgContent && (
-          <img
+          <div
             ref={imgRef}
-            src={blobUrl || ""}
-            alt="Clock face preview"
             className="p-8 drop-shadow-2xl"
             style={{
-              maxWidth: "100%",
-              maxHeight: "calc(100vh - 6rem)",
               transform: `scale(${scale})`,
               transformOrigin: "center center",
             }}
+            dangerouslySetInnerHTML={{ __html: inlineSvg || "" }}
           />
         )}
       </div>

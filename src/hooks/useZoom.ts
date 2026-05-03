@@ -20,7 +20,7 @@ export const useZoom = ({
   const [state, setState] = useState<ZoomState>({
     scale: initialScale,
   });
-  const imgRef = useRef<HTMLImageElement>(null);
+  const imgRef = useRef<HTMLDivElement>(null);
 
   const handleWheel = useCallback((event: WheelEvent) => {
     event.preventDefault();
