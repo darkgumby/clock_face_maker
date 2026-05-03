@@ -250,14 +250,26 @@ export default function Home() {
   };
 
   const handleCreateProjectAction = async (name: string, description?: string) => {
-    const newProject = await createProject(name, description);
-    setPendingInitProject(newProject);
-    setShowInitModal(true);
-    return newProject;
+    console.log("Creating project:", name);
+    setShowInitModal(true); // Set immediately to block auto-switching useEffects
+    try {
+      const newProject = await createProject(name, description);
+      console.log("Project created, showing modal for:", newProject.id);
+      setPendingInitProject(newProject);
+      return newProject;
+    } catch (err) {
+      console.error("Failed to create project:", err);
+      setShowInitModal(false);
+      throw err;
+    }
   };
 
   const handleInitChoice = (choice: "default" | "current") => {
-    if (!pendingInitProject) return;
+    console.log("Init choice:", choice, "for project:", pendingInitProject?.id);
+    if (!pendingInitProject) {
+      setShowInitModal(false);
+      return;
+    }
     
     if (choice === "current") {
       updateProjectParams(pendingInitProject.id, params);
