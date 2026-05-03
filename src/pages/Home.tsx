@@ -5,6 +5,7 @@ import FontPanel from "../components/FontPanel";
 import ProjectSidebar from "../components/ProjectSidebar";
 import SvgPreview from "../components/SvgPreview";
 import CollapsiblePanel from "../components/CollapsiblePanel";
+import Button from "../components/Button";
 import { generateSvg } from "../lib/generateSvg";
 import { embedGoogleFont } from "../lib/embedFont";
 import { convertTextToPaths, getRequiredChars } from "../lib/textToPath";
@@ -23,7 +24,7 @@ const DEFAULT_PARAMS = {
   border_color: "#ffffff",
   border_width: 5,
   mark_color: "#000000",
-  hour_mark_length: 18,
+  hour_mark_length: 10,
   hour_mark_width: 3,
   show_minute_marks: true,
   minute_mark_length: 8,
@@ -34,7 +35,7 @@ const DEFAULT_PARAMS = {
   number_font_weight: 400,
   number_font_italic: false,
   number_roman: false,
-  number_mark_gap: 16,
+  number_mark_gap: 24,
   center_hole_diameter: 8,
   cardinal_marks_only: false,
   cardinal_numbers_only: false,
@@ -240,17 +241,58 @@ export default function Home() {
     }
   };
 
+  const [showInitModal, setShowInitModal] = useState(false);
+  const [pendingInitProject, setPendingInitProject] = useState<ProjectRecord | null>(null);
+
+  const handleCreateProjectAction = async (name: string, description?: string) => {
+    const newProject = await createProject(name, description);
+    setPendingInitProject(newProject);
+    setShowInitModal(true);
+    return newProject;
+  };
+
+  const handleInitChoice = (choice: "default" | "current") => {
+    if (!pendingInitProject) return;
+    
+    if (choice === "current") {
+      updateProjectParams(pendingInitProject.id, params);
+    }
+    
+    handleSelectProject(pendingInitProject);
+    setShowInitModal(false);
+    setPendingInitProject(null);
+  };
+
   const allErrors = [projectsError, settingsError, svgError].filter(Boolean).join(" ");
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-900 text-gray-100">
+    <div className="flex h-screen overflow-hidden bg-gray-900 text-gray-100 relative">
+      {showInitModal && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-gray-800 p-6 rounded-lg shadow-2xl border border-gray-700 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-semibold mb-2">New Project Created</h3>
+            <p className="text-gray-400 text-sm mb-6">
+              Would you like to start with the default clock settings, or keep your current values?
+            </p>
+            <div className="flex flex-col gap-y-2">
+              <Button onClick={() => handleInitChoice("default")} variant="primary" className="w-full py-2">
+                Use Default Settings
+              </Button>
+              <Button onClick={() => handleInitChoice("current")} variant="secondary" className="w-full py-2">
+                Keep Current Settings
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <CollapsiblePanel title="Projects" borderSide="left">
         <ProjectSidebar
           projects={projects}
           loading={projectsLoading || settingsLoading}
           currentProject={currentProject}
           onSelect={handleSelectProject}
-          onCreate={createProject}
+          onCreate={handleCreateProjectAction}
           onDelete={deleteProject}
           projectsError={projectsError}
         />

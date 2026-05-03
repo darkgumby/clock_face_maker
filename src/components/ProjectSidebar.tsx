@@ -29,8 +29,7 @@ const ProjectSidebar: FC<ProjectSidebarProps> = ({
   const handleCreateProject = async () => {
     if (!projectName.trim()) return;
     try {
-      const newProject = await onCreate(projectName, projectDescription);
-      onSelect(newProject);
+      await onCreate(projectName, projectDescription);
       setProjectName("");
       setProjectDescription("");
       setIsCreatingProject(false);
