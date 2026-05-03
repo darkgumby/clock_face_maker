@@ -24,7 +24,7 @@ const DEFAULT_PARAMS = {
   border_color: "#ffffff",
   border_width: 5,
   mark_color: "#000000",
-  hour_mark_length: 10,
+  hour_mark_length: 18,
   hour_mark_width: 3,
   show_minute_marks: true,
   minute_mark_length: 8,
@@ -35,7 +35,7 @@ const DEFAULT_PARAMS = {
   number_font_weight: 400,
   number_font_italic: false,
   number_roman: false,
-  number_mark_gap: 24,
+  number_mark_gap: 16,
   center_hole_diameter: 8,
   cardinal_marks_only: false,
   cardinal_numbers_only: false,
@@ -77,16 +77,18 @@ export default function Home() {
     error: settingsError
   } = useSettings();
 
+  const [showInitModal, setShowInitModal] = useState(false);
+  const [pendingInitProject, setPendingInitProject] = useState<ProjectRecord | null>(null);
+  const [params, setParams] = useState<Params>({ ...DEFAULT_PARAMS, number_font: defaultFont });
+  const [svgError, setSvgError] = useState<string | null>(null);
+  const [downloadingFont, setDownloadingFont] = useState(false);
+
   const unitPreference: UnitPreference = (currentProject?.unit_preference as UnitPreference) || "mm";
 
   const hasCreatedDefaultProject = useRef(false);
 
   const defaultFontRef = useRef(defaultFont);
   useEffect(() => { defaultFontRef.current = defaultFont; }, [defaultFont]);
-
-  const [params, setParams] = useState<Params>({ ...DEFAULT_PARAMS, number_font: defaultFont });
-  const [svgError, setSvgError] = useState<string | null>(null);
-  const [downloadingFont, setDownloadingFont] = useState(false);
 
   const svgContent = useMemo(() => {
     try {
@@ -109,6 +111,10 @@ export default function Home() {
         });
       } else if (projects.length > 0) {
         hasCreatedDefaultProject.current = false;
+        
+        // If we're in the middle of creating a project, don't auto-switch yet
+        if (showInitModal) return;
+
         const lastSelected = projects.find(p => p.id === lastSelectedProjectId);
         if (lastSelected) {
           setCurrentProject(lastSelected);
@@ -118,12 +124,14 @@ export default function Home() {
         }
       }
     }
-  }, [projects, projectsLoading, settingsLoading, lastSelectedProjectId, createProject, setLastSelectedProjectId]);
+  }, [projects, projectsLoading, settingsLoading, lastSelectedProjectId, createProject, setLastSelectedProjectId, showInitModal]);
 
   useEffect(() => {
+    if (showInitModal) return; // Wait for user choice
+
     const base: Params = { ...DEFAULT_PARAMS, number_font: defaultFontRef.current };
     setParams(currentProject?.params ? { ...base, ...currentProject.params } : base);
-  }, [currentProject?.id, defaultFontRef.current]);
+  }, [currentProject?.id, defaultFontRef.current, showInitModal]);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentProjectRef = useRef(currentProject);
@@ -240,9 +248,6 @@ export default function Home() {
       setSvgError("Failed to export PNG.");
     }
   };
-
-  const [showInitModal, setShowInitModal] = useState(false);
-  const [pendingInitProject, setPendingInitProject] = useState<ProjectRecord | null>(null);
 
   const handleCreateProjectAction = async (name: string, description?: string) => {
     const newProject = await createProject(name, description);
