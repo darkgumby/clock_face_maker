@@ -72,7 +72,7 @@ function buildGridSvg(svg: string, unit: UnitPreference = "mm"): string {
 }
 
 export default function SvgPreview({ svgContent, onDownloadSvg, svgError, downloadingFont, unitPreference = "mm" }: SvgPreviewProps) {
-  const { imgRef, scale } = useZoom();
+  const { imgRef, scale, zoomIn, zoomOut, resetZoom } = useZoom();
   const [showGrid, setShowGrid] = useState(false);
   const [fontVersion, setFontVersion] = useState(0);
 
@@ -102,11 +102,39 @@ export default function SvgPreview({ svgContent, onDownloadSvg, svgError, downlo
   return (
     <div className="flex-1 flex flex-col items-stretch bg-gray-300 relative overflow-hidden">
       {/* Toolbar */}
-      <div className="absolute top-4 right-4 z-10 flex gap-2">
+      <div className="absolute top-4 right-4 z-10 flex gap-2 items-center">
+        <div className="flex bg-gray-700 rounded overflow-hidden mr-2 shadow-lg">
+          <button
+            onClick={zoomOut}
+            title="Zoom Out"
+            className="px-2 py-1.5 hover:bg-gray-600 text-gray-200 transition-colors border-r border-gray-600"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path fillRule="evenodd" d="M2 8a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11A.5.5 0 0 1 2 8Z"/>
+            </svg>
+          </button>
+          <button
+            onClick={resetZoom}
+            title="Reset Zoom"
+            className="px-2 py-1.5 hover:bg-gray-600 text-gray-200 text-[10px] font-medium transition-colors border-r border-gray-600 min-w-[48px]"
+          >
+            {Math.round(scale * 100)}%
+          </button>
+          <button
+            onClick={zoomIn}
+            title="Zoom In"
+            className="px-2 py-1.5 hover:bg-gray-600 text-gray-200 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path fillRule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
+            </svg>
+          </button>
+        </div>
+
         <button
           onClick={() => setShowGrid((v) => !v)}
           disabled={!svgContent || !!svgError}
-          className={`px-3 py-1.5 text-xs rounded transition-colors disabled:opacity-40 ${
+          className={`px-3 py-1.5 text-xs rounded transition-colors disabled:opacity-40 shadow-lg ${
             showGrid
               ? "bg-blue-600 hover:bg-blue-500 text-white"
               : "bg-gray-700 hover:bg-gray-600 text-gray-200"
@@ -117,7 +145,7 @@ export default function SvgPreview({ svgContent, onDownloadSvg, svgError, downlo
         <button
           onClick={onDownloadSvg}
           disabled={!svgContent || !!svgError || downloadingFont}
-          className="px-3 py-1.5 text-xs rounded bg-gray-700 hover:bg-gray-600 text-gray-200 disabled:opacity-40 transition-colors"
+          className="px-3 py-1.5 text-xs rounded bg-gray-700 hover:bg-gray-600 text-gray-200 disabled:opacity-40 transition-colors shadow-lg"
         >
           {downloadingFont ? "Embedding font…" : "Download SVG"}
         </button>
@@ -125,6 +153,7 @@ export default function SvgPreview({ svgContent, onDownloadSvg, svgError, downlo
 
       {/* Preview area */}
       <div
+        ref={imgRef}
         className="flex-1 flex items-center justify-center pt-12"
         style={{ overflow: "hidden", position: "relative" }}
       >
@@ -136,7 +165,6 @@ export default function SvgPreview({ svgContent, onDownloadSvg, svgError, downlo
         )}
         {!svgError && svgContent && (
           <div
-            ref={imgRef}
             className="p-8 drop-shadow-2xl"
             style={{
               transform: `scale(${scale})`,

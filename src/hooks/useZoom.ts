@@ -33,6 +33,18 @@ export const useZoom = ({
     setState({ scale: newScale });
   }, [state.scale, minScale, maxScale, zoomSpeed]);
 
+  const zoomIn = useCallback(() => {
+    setState(s => ({ scale: Math.min(maxScale, s.scale * 1.2) }));
+  }, [maxScale]);
+
+  const zoomOut = useCallback(() => {
+    setState(s => ({ scale: Math.max(minScale, s.scale / 1.2) }));
+  }, [minScale]);
+
+  const resetZoom = useCallback(() => {
+    setState({ scale: initialScale });
+  }, [initialScale]);
+
   useEffect(() => {
     const imgElement = imgRef.current;
     if (imgElement) {
@@ -46,5 +58,5 @@ export const useZoom = ({
     };
   }, [handleWheel]);
 
-  return { imgRef, scale: state.scale };
+  return { imgRef, scale: state.scale, zoomIn, zoomOut, resetZoom };
 };
