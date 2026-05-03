@@ -6,6 +6,7 @@ import ProjectSidebar from "../components/ProjectSidebar";
 import SvgPreview from "../components/SvgPreview";
 import CollapsiblePanel from "../components/CollapsiblePanel";
 import { generateSvg } from "../lib/generateSvg";
+import { embedGoogleFont } from "../lib/embedFont";
 import { useProjects, type ProjectRecord } from "../hooks/useProjects";
 import { useSettings, UnitPreference } from "../hooks/useSettings";
 
@@ -79,6 +80,7 @@ export default function Home() {
 
   const [params, setParams] = useState<Params>({ ...DEFAULT_PARAMS, number_font: defaultFont });
   const [svgError, setSvgError] = useState<string | null>(null);
+  const [downloadingFont, setDownloadingFont] = useState(false);
 
   const svgContent = useMemo(() => {
     try {
@@ -158,9 +160,20 @@ export default function Home() {
     setLastSelectedProjectId(project.id);
   };
 
-  const handleDownloadSvg = () => {
+  const handleDownloadSvg = async () => {
     if (!svgContent) return;
-    const blob = new Blob([svgContent], { type: "image/svg+xml" });
+    setDownloadingFont(true);
+    let finalSvg = svgContent;
+    if (params.show_numbers) {
+      finalSvg = await embedGoogleFont(
+        svgContent,
+        params.number_font,
+        params.number_font_weight,
+        params.number_font_italic
+      );
+    }
+    setDownloadingFont(false);
+    const blob = new Blob([finalSvg], { type: "image/svg+xml" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -189,6 +202,7 @@ export default function Home() {
         svgContent={svgContent}
         onDownloadSvg={handleDownloadSvg}
         svgError={svgError}
+        downloadingFont={downloadingFont}
       />
 
       <CollapsiblePanel title="Face" borderSide="right">

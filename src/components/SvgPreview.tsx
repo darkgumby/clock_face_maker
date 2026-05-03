@@ -4,10 +4,11 @@ import { useZoom } from "../hooks/useZoomPan"; // Import the new hook
 interface SvgPreviewProps {
   svgContent: string | null;
   onDownloadSvg: () => void;
-  svgError: string | null; // Prop to receive SVG generation errors
+  svgError: string | null;
+  downloadingFont?: boolean;
 }
 
-export default function SvgPreview({ svgContent, onDownloadSvg, svgError }: SvgPreviewProps) {
+export default function SvgPreview({ svgContent, onDownloadSvg, svgError, downloadingFont }: SvgPreviewProps) {
   const { imgRef, scale } = useZoom(); // Use the zoom hook
 
   const blobUrl = useMemo(() => {
@@ -28,10 +29,10 @@ export default function SvgPreview({ svgContent, onDownloadSvg, svgError }: SvgP
       <div className="absolute top-4 right-4 z-10">
         <button
           onClick={onDownloadSvg}
-          disabled={!svgContent || !!svgError} // Disable if no content or there's an error
+          disabled={!svgContent || !!svgError || downloadingFont}
           className="px-3 py-1.5 text-xs rounded bg-gray-700 hover:bg-gray-600 text-gray-200 disabled:opacity-40 transition-colors"
         >
-          Download SVG
+          {downloadingFont ? "Embedding font…" : "Download SVG"}
         </button>
       </div>
 
