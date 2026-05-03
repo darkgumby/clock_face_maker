@@ -12,7 +12,7 @@ interface UseZoomProps {
 }
 
 export const useZoom = ({
-  initialScale = 2,
+  initialScale = 1,
   minScale = 0.1,
   maxScale = 10,
   zoomSpeed = 0.001,

@@ -13,9 +13,9 @@ import { useProjects, type ProjectRecord } from "../hooks/useProjects";
 import { useSettings, UnitPreference } from "../hooks/useSettings";
 
 const DEFAULT_PARAMS = {
-  diameter: 250,
-  face_width: 250,
-  face_height: 250,
+  diameter: 300,
+  face_width: 300,
+  face_height: 300,
   face_shape: "circle" as import("../lib/generateSvg").FaceShape,
   corner_radius: 20,
   face_color: "#ffffff",
@@ -28,8 +28,8 @@ const DEFAULT_PARAMS = {
   minute_mark_length: 8,
   minute_mark_width: 1,
   show_numbers: true,
-  number_font: "Roboto",
-  number_size: 20,
+  number_font: "Abril Fatface",
+  number_size: 32,
   number_font_weight: 400,
   number_font_italic: false,
   number_roman: false,
