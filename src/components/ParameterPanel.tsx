@@ -81,7 +81,7 @@ const ParameterPanel: FC<ParameterPanelProps> = ({
             label="Diameter"
             value={params.diameter}
             onChange={(v) => onChange({ diameter: v })}
-            minMm={100} maxMm={600} stepMm={10}
+            minMm={100} maxMm={1000} stepMm={10}
             unit={unitPreference}
           />
         ) : (
@@ -98,14 +98,14 @@ const ParameterPanel: FC<ParameterPanelProps> = ({
               label="Width"
               value={params.face_width}
               onChange={(v) => onChange(lockDimensions ? { face_width: v, face_height: v } : { face_width: v })}
-              minMm={100} maxMm={600} stepMm={10}
+              minMm={100} maxMm={1000} stepMm={10}
               unit={unitPreference}
             />
             <UnitInputRange
               label="Height"
               value={params.face_height}
               onChange={(v) => onChange(lockDimensions ? { face_width: v, face_height: v } : { face_height: v })}
-              minMm={100} maxMm={600} stepMm={10}
+              minMm={100} maxMm={1000} stepMm={10}
               unit={unitPreference}
             />
           </>
@@ -132,7 +132,7 @@ const ParameterPanel: FC<ParameterPanelProps> = ({
             label="Corner Radius"
             value={params.corner_radius}
             onChange={(v) => onChange({ corner_radius: v })}
-            min={0} max={80} step={1}
+            min={0} max={100} step={1}
           />
         )}
         <ColorInput

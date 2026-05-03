@@ -220,6 +220,7 @@ export default function Home() {
         onDownloadSvg={handleDownloadSvg}
         svgError={svgError}
         downloadingFont={downloadingFont}
+        unitPreference={unitPreference}
       />
 
       <CollapsiblePanel title="Face" borderSide="right">
