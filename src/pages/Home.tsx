@@ -7,6 +7,7 @@ import SvgPreview from "../components/SvgPreview";
 import CollapsiblePanel from "../components/CollapsiblePanel";
 import { generateSvg } from "../lib/generateSvg";
 import { embedGoogleFont } from "../lib/embedFont";
+import { convertTextToPaths, getRequiredChars } from "../lib/textToPath";
 import { useProjects, type ProjectRecord } from "../hooks/useProjects";
 import { useSettings, UnitPreference } from "../hooks/useSettings";
 
@@ -47,6 +48,8 @@ const DEFAULT_PARAMS = {
   minute_mark_diamond_width: 3,
   minute_mark_diamond_height: 5,
   mark_border_gap: 2,
+  laser_mode: false,
+  show_crosshair: false,
 };
 
 type Params = typeof DEFAULT_PARAMS;
@@ -165,12 +168,26 @@ export default function Home() {
     setDownloadingFont(true);
     let finalSvg = svgContent;
     if (params.show_numbers) {
-      finalSvg = await embedGoogleFont(
+      const chars = getRequiredChars(params.number_roman, params.cardinal_numbers_only);
+      // Try text-to-path first; fall back to embedded font
+      const withPaths = await convertTextToPaths(
         svgContent,
         params.number_font,
         params.number_font_weight,
-        params.number_font_italic
+        params.number_font_italic,
+        chars
       );
+      if (withPaths !== svgContent) {
+        finalSvg = withPaths;
+      } else {
+        finalSvg = await embedGoogleFont(
+          svgContent,
+          params.number_font,
+          params.number_font_weight,
+          params.number_font_italic,
+          chars
+        );
+      }
     }
     setDownloadingFont(false);
     const blob = new Blob([finalSvg], { type: "image/svg+xml" });

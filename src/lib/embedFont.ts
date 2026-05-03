@@ -14,13 +14,15 @@ export async function embedGoogleFont(
   svg: string,
   fontFamily: string,
   weight: number,
-  italic: boolean
+  italic: boolean,
+  chars?: string
 ): Promise<string> {
   if (!GOOGLE_FONTS.includes(fontFamily)) return svg;
 
   try {
     const style = italic ? "1" : "0";
-    const cssUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontFamily)}:ital,wght@${style},${weight}`;
+    const textParam = chars ? `&text=${encodeURIComponent(chars)}` : "";
+    const cssUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontFamily)}:ital,wght@${style},${weight}${textParam}`;
     const cssResp = await fetch(cssUrl);
     if (!cssResp.ok) return svg;
     const css = await cssResp.text();

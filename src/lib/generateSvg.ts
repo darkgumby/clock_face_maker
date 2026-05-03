@@ -76,6 +76,8 @@ interface SvgParams {
   minute_mark_square_size?: number;
   minute_mark_diamond_width?: number;
   minute_mark_diamond_height?: number;
+  laser_mode?: boolean;
+  show_crosshair?: boolean;
 }
 
 export function generateSvg(params: SvgParams): string {
@@ -120,6 +122,15 @@ export function generateSvg(params: SvgParams): string {
   const minuteMarkSquareSize = params.minute_mark_square_size ?? 3;
   const minuteMarkDiamondW = params.minute_mark_diamond_width ?? 3;
   const minuteMarkDiamondH = params.minute_mark_diamond_height ?? 5;
+  const laserMode = params.laser_mode ?? false;
+  const showCrosshair = params.show_crosshair ?? false;
+
+  // In laser mode, override colors to LightBurn conventions:
+  // red = engrave/fill, black = cut, green = alignment
+  const effectiveFaceColor   = laserMode ? "#ff0000" : (params.face_color ?? "#ffffff");
+  const effectiveBorderColor = laserMode ? "#000000" : (params.border_color ?? "#000000");
+  const effectiveMarkColor   = laserMode ? "#000000" : (params.mark_color ?? "#000000");
+  const effectiveCrosshairColor = laserMode ? "#00ff00" : (params.mark_color ?? "#000000");
 
   const innerRadius = Math.min(svgWidth, svgHeight) / 2 - borderWidth;
   const markOuterRadius = innerRadius - markBorderGap;
@@ -131,18 +142,22 @@ export function generateSvg(params: SvgParams): string {
     : hourMarkLength;
   const numRadius = markOuterRadius - effectiveHourMarkLength - numberMarkGap;
 
-  const els: string[] = [];
+  const faceEls: string[] = [];
+  const minuteMarkEls: string[] = [];
+  const hourMarkEls: string[] = [];
+  const numberEls: string[] = [];
+  const centerEls: string[] = [];
 
   if (faceShape === "circle") {
     const radius = diameter / 2;
-    els.push(
-      `<circle cx="${cx}" cy="${cy}" r="${radius - borderWidth / 2}" fill="${faceColor}" stroke="${borderColor}" stroke-width="${borderWidth}"/>`
+    faceEls.push(
+      `<circle cx="${cx}" cy="${cy}" r="${radius - borderWidth / 2}" fill="${effectiveFaceColor}" stroke="${effectiveBorderColor}" stroke-width="${borderWidth}"/>`
     );
   } else {
     const rx = faceShape === "rounded_square" ? cornerRadius : 0;
     const inset = borderWidth / 2;
-    els.push(
-      `<rect x="${inset}" y="${inset}" width="${svgWidth - borderWidth}" height="${svgHeight - borderWidth}" rx="${rx}" ry="${rx}" fill="${faceColor}" stroke="${borderColor}" stroke-width="${borderWidth}"/>`
+    faceEls.push(
+      `<rect x="${inset}" y="${inset}" width="${svgWidth - borderWidth}" height="${svgHeight - borderWidth}" rx="${rx}" ry="${rx}" fill="${effectiveFaceColor}" stroke="${effectiveBorderColor}" stroke-width="${borderWidth}"/>`
     );
   }
 
@@ -159,15 +174,15 @@ export function generateSvg(params: SvgParams): string {
       const [x1, y1] = markStart(a, ca, sa);
       if (minuteMarkStyle === "circle") {
         const ccx = x1 - minuteMarkCircleRadius * ca, ccy = y1 - minuteMarkCircleRadius * sa;
-        els.push(`<circle cx="${ccx}" cy="${ccy}" r="${minuteMarkCircleRadius}" fill="${markColor}"/>`);
+        minuteMarkEls.push(`<circle cx="${ccx}" cy="${ccy}" r="${minuteMarkCircleRadius}" fill="${effectiveMarkColor}"/>`);
       } else if (minuteMarkStyle === "square") {
         const s = minuteMarkSquareSize, ccx = x1 - s / 2 * ca, ccy = y1 - s / 2 * sa;
-        els.push(markPolygon(ccx, ccy, ca, sa, [[-s/2,-s/2],[s/2,-s/2],[s/2,s/2],[-s/2,s/2]], markColor));
+        minuteMarkEls.push(markPolygon(ccx, ccy, ca, sa, [[-s/2,-s/2],[s/2,-s/2],[s/2,s/2],[-s/2,s/2]], markColor));
       } else if (minuteMarkStyle === "diamond") {
         const ccx = x1 - minuteMarkDiamondH / 2 * ca, ccy = y1 - minuteMarkDiamondH / 2 * sa;
-        els.push(markPolygon(ccx, ccy, ca, sa, [[0,minuteMarkDiamondH/2],[minuteMarkDiamondW/2,0],[0,-minuteMarkDiamondH/2],[-minuteMarkDiamondW/2,0]], markColor));
+        minuteMarkEls.push(markPolygon(ccx, ccy, ca, sa, [[0,minuteMarkDiamondH/2],[minuteMarkDiamondW/2,0],[0,-minuteMarkDiamondH/2],[-minuteMarkDiamondW/2,0]], markColor));
       } else {
-        els.push(`<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveMinuteMarkLength * ca}" y2="${y1 - effectiveMinuteMarkLength * sa}" stroke="${markColor}" stroke-width="${minuteMarkWidth}" stroke-linecap="${markLinecap}"/>`);
+        minuteMarkEls.push(`<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveMinuteMarkLength * ca}" y2="${y1 - effectiveMinuteMarkLength * sa}" stroke="${effectiveMarkColor}" stroke-width="${minuteMarkWidth}" stroke-linecap="${markLinecap}"/>`);
       }
     }
   }
@@ -179,15 +194,15 @@ export function generateSvg(params: SvgParams): string {
     const [x1, y1] = markStart(a, ca, sa);
     if (hourMarkStyle === "circle") {
       const ccx = x1 - hourMarkCircleRadius * ca, ccy = y1 - hourMarkCircleRadius * sa;
-      els.push(`<circle cx="${ccx}" cy="${ccy}" r="${hourMarkCircleRadius}" fill="${markColor}"/>`);
+      hourMarkEls.push(`<circle cx="${ccx}" cy="${ccy}" r="${hourMarkCircleRadius}" fill="${effectiveMarkColor}"/>`);
     } else if (hourMarkStyle === "square") {
       const s = hourMarkSquareSize, ccx = x1 - s / 2 * ca, ccy = y1 - s / 2 * sa;
-      els.push(markPolygon(ccx, ccy, ca, sa, [[-s/2,-s/2],[s/2,-s/2],[s/2,s/2],[-s/2,s/2]], markColor));
+      hourMarkEls.push(markPolygon(ccx, ccy, ca, sa, [[-s/2,-s/2],[s/2,-s/2],[s/2,s/2],[-s/2,s/2]], markColor));
     } else if (hourMarkStyle === "diamond") {
       const ccx = x1 - hourMarkDiamondH / 2 * ca, ccy = y1 - hourMarkDiamondH / 2 * sa;
-      els.push(markPolygon(ccx, ccy, ca, sa, [[0,hourMarkDiamondH/2],[hourMarkDiamondW/2,0],[0,-hourMarkDiamondH/2],[-hourMarkDiamondW/2,0]], markColor));
+      hourMarkEls.push(markPolygon(ccx, ccy, ca, sa, [[0,hourMarkDiamondH/2],[hourMarkDiamondW/2,0],[0,-hourMarkDiamondH/2],[-hourMarkDiamondW/2,0]], markColor));
     } else {
-      els.push(`<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveHourMarkLength * ca}" y2="${y1 - effectiveHourMarkLength * sa}" stroke="${markColor}" stroke-width="${hourMarkWidth}" stroke-linecap="${markLinecap}"/>`);
+      hourMarkEls.push(`<line x1="${x1}" y1="${y1}" x2="${x1 - effectiveHourMarkLength * ca}" y2="${y1 - effectiveHourMarkLength * sa}" stroke="${effectiveMarkColor}" stroke-width="${hourMarkWidth}" stroke-linecap="${markLinecap}"/>`);
     }
   }
 
@@ -196,15 +211,36 @@ export function generateSvg(params: SvgParams): string {
       if (cardinalNumbersOnly && i % 3 !== 0) continue;
       const a = ((i * 30 - 90) * Math.PI) / 180;
       const label = numberRoman ? ROMAN[i - 1] : String(i);
-      els.push(
-        `<text x="${cx + numRadius * Math.cos(a)}" y="${cy + numRadius * Math.sin(a)}" text-anchor="middle" dominant-baseline="central" font-family="${numberFont}" font-size="${numberSize}px" font-weight="${numberFontWeight}" font-style="${numberFontItalic ? "italic" : "normal"}" fill="${markColor}">${label}</text>`
+      numberEls.push(
+        `<text x="${cx + numRadius * Math.cos(a)}" y="${cy + numRadius * Math.sin(a)}" text-anchor="middle" dominant-baseline="central" font-family="${numberFont}" font-size="${numberSize}px" font-weight="${numberFontWeight}" font-style="${numberFontItalic ? "italic" : "normal"}" fill="${effectiveMarkColor}" text-rendering="geometricPrecision">${label}</text>`
       );
     }
   }
 
-  els.push(
+  centerEls.push(
     `<circle cx="${cx}" cy="${cy}" r="${centerHoleDiameter / 2}" fill="#000000"/>`
   );
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}px" height="${svgHeight}px" viewBox="0 0 ${svgWidth} ${svgHeight}">\n${els.join("\n")}\n</svg>`;
+  const crosshairEls: string[] = [];
+  if (showCrosshair) {
+    const cw = 0.5;
+    crosshairEls.push(
+      `<line x1="0" y1="${cy}" x2="${svgWidth}" y2="${cy}" stroke="${effectiveCrosshairColor}" stroke-width="${cw}"/>`,
+      `<line x1="${cx}" y1="0" x2="${cx}" y2="${svgHeight}" stroke="${effectiveCrosshairColor}" stroke-width="${cw}"/>`
+    );
+  }
+
+  const metadata = `<metadata>{"generator":"clock-face-maker","src":"https://github.com/darkgumby/clock_face_maker","params":${JSON.stringify(params)}}</metadata>`;
+
+  const groups = [
+    metadata,
+    `<g id="face">\n${faceEls.join("\n")}\n</g>`,
+    ...(minuteMarkEls.length ? [`<g id="minute-marks">\n${minuteMarkEls.join("\n")}\n</g>`] : []),
+    `<g id="hour-marks">\n${hourMarkEls.join("\n")}\n</g>`,
+    ...(numberEls.length ? [`<g id="numbers">\n${numberEls.join("\n")}\n</g>`] : []),
+    `<g id="center">\n${centerEls.join("\n")}\n</g>`,
+    ...(crosshairEls.length ? [`<g id="crosshair">\n${crosshairEls.join("\n")}\n</g>`] : []),
+  ];
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}mm" height="${svgHeight}mm" viewBox="0 0 ${svgWidth} ${svgHeight}">\n${groups.join("\n")}\n</svg>`;
 }

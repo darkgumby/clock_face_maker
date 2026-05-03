@@ -83,7 +83,7 @@ export default function FontPanel({ params, onChange, onSetDefaultFont }: FontPa
         <Toggle label="Italic" value={params.number_font_italic} onChange={(v) => onChange({ number_font_italic: v })} />
 <Toggle label="Roman Numerals" value={params.number_roman} onChange={(v) => onChange({ number_roman: v })} />
 
-        <Slider label="Size" value={params.number_size} min={8} max={40} step={1} onChange={(v) => onChange({ number_size: v })} />
+        <Slider label="Size" value={params.number_size} min={8} max={72} step={1} onChange={(v) => onChange({ number_size: v })} />
 
         <div className="mt-2 p-3 bg-gray-700 rounded text-center" style={{
           fontFamily: `"${params.number_font}", sans-serif`,

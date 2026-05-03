@@ -11,7 +11,7 @@ A parametric clock face designer that outputs SVG files, with project management
 - **Zoom:** Mouse wheel zoom on the clock preview.
 - **Project Management:** Create and switch between multiple projects. Last selected project is remembered.
 - **Snapshots:** Save and restore parameter states per project.
-- **SVG Download:** Export your clock face as an SVG file.
+- **SVG Download:** Export your clock face as a production-ready SVG file.
 - **No backend:** Everything runs in the browser. Data persists in localStorage — no login, no server.
 
 ## Parameters
@@ -24,6 +24,29 @@ A parametric clock face designer that outputs SVG files, with project management
 - Numbers — font, size, weight, italic, Roman numeral option, gap from marks
 - Center hole diameter
 - Mix and match hour vs. minute mark styles independently
+- **Laser Mode** — overrides colors to LightBurn conventions: face fill red (engrave), marks/border black (cut), crosshair green (alignment)
+- **Crosshair** — thin alignment lines through center for registration jigs and re-engraving
+
+## SVG Output Quality
+
+Downloaded SVGs are production-ready for laser, CNC, and design workflows:
+
+- **Real-world units** — `width`/`height` in `mm` on the SVG root so tools like LightBurn, Inkscape, and Fusion 360 import at the correct physical size without rescaling
+- **Named layer groups** — elements wrapped in `<g id="face">`, `<g id="hour-marks">`, `<g id="minute-marks">`, `<g id="numbers">`, `<g id="center">`, `<g id="crosshair">` for easy per-layer operation assignment
+- **Text as paths** — numbers are converted to vector paths at download time using the actual font geometry; no font dependency in the exported file
+- **Font subsetting** — only the glyphs used on the face are fetched, keeping file size small; falls back to embedded font if path conversion fails
+- **Embedded parameters** — a `<metadata>` block in every SVG stores the full parameter set as JSON for later reconstruction
+- **`text-rendering="geometricPrecision"`** — sharp numeral rendering in SVG viewers and laser software previews
+
+## Laser Mode Color Convention
+
+| Color | Layer | Operation |
+|-------|-------|-----------|
+| Red `#ff0000` | `face` | Engrave / fill |
+| Black `#000000` | `hour-marks`, `minute-marks`, `numbers`, `center`, border | Cut |
+| Green `#00ff00` | `crosshair` | Alignment (ignore or cut lightly) |
+
+Map these to operations in LightBurn, xTool Creative Space, or your software of choice.
 
 ## Use Cases
 
@@ -61,6 +84,7 @@ Forks and PRs welcome.
 - **Frontend:** React (TypeScript) + Vite + Tailwind CSS
 - **Persistence:** localStorage — no backend, no server required
 - **SVG Generation:** Pure TypeScript in the browser
+- **Text-to-path:** opentype.js (download-time conversion)
 
 ## Getting Started
 

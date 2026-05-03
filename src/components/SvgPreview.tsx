@@ -24,7 +24,7 @@ export default function SvgPreview({ svgContent, onDownloadSvg, svgError, downlo
   }, [blobUrl]);
 
   return (
-    <div className="flex-1 flex flex-col items-stretch bg-gray-950 relative overflow-hidden">
+    <div className="flex-1 flex flex-col items-stretch bg-gray-300 relative overflow-hidden">
       {/* Toolbar */}
       <div className="absolute top-4 right-4 z-10">
         <button

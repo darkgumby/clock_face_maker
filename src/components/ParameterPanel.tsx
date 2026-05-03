@@ -14,6 +14,8 @@ interface ParameterPanelProps {
     border_color: string;
     border_width: number;
     center_hole_diameter: number;
+    laser_mode: boolean;
+    show_crosshair: boolean;
   };
   onChange: (params: Partial<ParameterPanelProps["params"]>) => void;
   currentProject: any;
@@ -156,6 +158,20 @@ const ParameterPanel: FC<ParameterPanelProps> = ({
           onChange={(v) => onChange({ center_hole_diameter: v })}
           minMm={2} maxMm={30} stepMm={0.5}
           unit={unitPreference}
+        />
+      </div>
+
+      <div className="flex flex-col gap-y-2">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Export</h3>
+        <BooleanToggle
+          label="Laser Mode"
+          value={params.laser_mode}
+          onChange={(v) => onChange({ laser_mode: v })}
+        />
+        <BooleanToggle
+          label="Crosshair"
+          value={params.show_crosshair}
+          onChange={(v) => onChange({ show_crosshair: v })}
         />
       </div>
 
