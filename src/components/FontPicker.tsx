@@ -42,8 +42,6 @@ export const GOOGLE_FONTS: string[] = [
 
 const FONT_WEIGHTS = "ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900";
 
-// Individual per-font CSS links with tracked Promises — used by select() so a
-// failed or oversized batch can never silently block a font from loading.
 const _fontReady = new Map<string, Promise<void>>();
 
 function getFontReadyPromise(font: string): Promise<void> {
@@ -61,10 +59,8 @@ function getFontReadyPromise(font: string): Promise<void> {
   return _fontReady.get(font)!;
 }
 
-// Fonts already queued via batch links (fire-and-forget preloading).
 const _batchSeen = new Set<string>();
 
-// Batch-loads fonts for dropdown preview. Chunked at 20 to avoid URL limits.
 function loadGoogleFonts(names: string[]): void {
   const toLoad = names.filter((n) => !_batchSeen.has(n) && !_fontReady.has(n));
   if (toLoad.length === 0) return;
@@ -84,112 +80,83 @@ function loadGoogleFonts(names: string[]): void {
 interface FontPickerProps {
   value: string;
   onChange: (font: string) => void;
-  // Add any other props here if they become necessary
 }
 
 export default function FontPicker({ value, onChange }: FontPickerProps) {
-  const [open, setOpen] = useState<boolean>(false);
-  const [query, setQuery] = useState<string>("");
-  const rootRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery] = useState("");
+  const listRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(() => {
+    if (!query) return GOOGLE_FONTS;
     const q = query.toLowerCase();
     return GOOGLE_FONTS.filter((f) => f.toLowerCase().includes(q));
   }, [query]);
 
-  // Load the selected font for the trigger preview
-  useEffect(() => { loadGoogleFonts([value]); }, [value]);
+  // Batch-preload fonts visible in filtered list
+  useEffect(() => { loadGoogleFonts(filtered); }, [filtered]);
 
+  // Scroll selected item into view when value changes or filter resets
   useEffect(() => {
-    if (open) loadGoogleFonts(filtered);
-  }, [open, filtered]);
-
-  useEffect(() => {
-    if (open) selectedRef.current?.scrollIntoView({ block: "nearest" });
-  }, [open]);
-
-  // Close on outside click
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) {
-        setOpen(false);
-        setQuery("");
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
+    selectedRef.current?.scrollIntoView({ block: "nearest" });
+  }, [value, query]);
 
   const select = (font: string) => {
-    setOpen(false);
-    setQuery("");
-    // Phase 1: wait for the individual per-font CSS link so @font-face rules are
-    // registered (not the batch link, which can fail at large URL sizes).
-    // Phase 2: wait for the actual font file via document.fonts.load().
-    // Race with 3s timeout so slow/failed network still propagates the change.
+    // Update UI immediately; kick off reliable per-font CSS load in background
+    // so the SVG renders with the correct typeface once it arrives.
+    onChange(font);
     const fontReady = getFontReadyPromise(font)
       .then(() => document.fonts.load(`400 16px "${font}"`));
     const timeout = new Promise<void>((res) => setTimeout(res, 3000));
+    // Re-fire onChange after font is confirmed loaded to force SVG repaint
     Promise.race([fontReady, timeout]).then(() => onChange(font), () => onChange(font));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Escape") { setOpen(false); setQuery(""); }
-    if (e.key === "Enter" && filtered.length > 0) select(filtered[0]);
+    const idx = filtered.indexOf(value);
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (idx < filtered.length - 1) select(filtered[idx + 1]);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (idx > 0) select(filtered[idx - 1]);
+    }
   };
 
   return (
-    <div ref={rootRef} className="relative">
-      {/* Trigger */}
-      <button
-        type="button"
-        onClick={() => {
-          setOpen((v) => !v);
-          if (!open) setTimeout(() => inputRef.current?.focus(), 0);
-        }}
-        className="w-full flex items-center justify-between text-sm bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-200 focus:outline-none focus:border-blue-500 hover:border-gray-500"
+    <div className="flex flex-col gap-y-1">
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="Search fonts…"
+        className="w-full px-2 py-1 text-xs bg-gray-700 text-gray-200 placeholder-gray-500 border border-gray-600 rounded focus:outline-none focus:border-blue-500"
+      />
+      <div
+        ref={listRef}
+        className="overflow-y-auto rounded border border-gray-600 bg-gray-800"
+        style={{ height: "320px" }}
       >
-        <span style={{ fontFamily: `"${value}", sans-serif` }}>{value}</span>
-        <svg className="w-3 h-3 text-gray-400 shrink-0 ml-1" viewBox="0 0 10 6" fill="currentColor">
-          <path d="M0 0l5 6 5-6z" />
-        </svg>
-      </button>
-
-      {/* Dropdown */}
-      {open && (
-        <div className="absolute z-50 left-0 right-0 mt-1 bg-gray-800 border border-gray-600 rounded shadow-2xl">
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Search fonts…"
-            className="w-full px-2 py-1.5 text-xs bg-gray-700 text-gray-200 placeholder-gray-500 border-b border-gray-600 focus:outline-none rounded-t"
-          />
-          <div className="max-h-96 overflow-y-auto">
-            {filtered.map((font) => (
-              <div
-                key={font}
-                ref={font === value ? selectedRef : null}
-                onMouseDown={() => select(font)}
-                className={`px-2 py-1.5 text-sm cursor-pointer hover:bg-gray-700 transition-colors ${
-                  font === value ? "text-blue-400 bg-gray-700" : "text-gray-200"
-                }`}
-                style={{ fontFamily: `"${font}", sans-serif` }}
-              >
-                {font}
-              </div>
-            ))}
-            {filtered.length === 0 && (
-              <p className="px-2 py-2 text-xs text-gray-500">No fonts found.</p>
-            )}
+        {filtered.map((font) => (
+          <div
+            key={font}
+            ref={font === value ? selectedRef : null}
+            onClick={() => select(font)}
+            className={`px-2 py-1.5 text-sm cursor-pointer select-none transition-colors ${
+              font === value
+                ? "bg-blue-600 text-white"
+                : "text-gray-200 hover:bg-gray-700"
+            }`}
+            style={{ fontFamily: `"${font}", sans-serif` }}
+          >
+            {font}
           </div>
-        </div>
-      )}
+        ))}
+        {filtered.length === 0 && (
+          <p className="px-2 py-2 text-xs text-gray-500">No fonts found.</p>
+        )}
+      </div>
     </div>
   );
 }
