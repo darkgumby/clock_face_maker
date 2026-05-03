@@ -102,14 +102,10 @@ export default function FontPicker({ value, onChange }: FontPickerProps) {
   }, [value, query]);
 
   const select = (font: string) => {
-    // Update UI immediately; kick off reliable per-font CSS load in background
-    // so the SVG renders with the correct typeface once it arrives.
     onChange(font);
-    const fontReady = getFontReadyPromise(font)
-      .then(() => document.fonts.load(`400 16px "${font}"`));
-    const timeout = new Promise<void>((res) => setTimeout(res, 3000));
-    // Re-fire onChange after font is confirmed loaded to force SVG repaint
-    Promise.race([fontReady, timeout]).then(() => onChange(font), () => onChange(font));
+    // Kick off per-font CSS load; SvgPreview listens for loadingdone and
+    // remounts to repaint once the font file actually arrives.
+    getFontReadyPromise(font);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -136,14 +132,14 @@ export default function FontPicker({ value, onChange }: FontPickerProps) {
       <div
         ref={listRef}
         className="overflow-y-auto rounded border border-gray-600 bg-gray-800"
-        style={{ height: "320px" }}
+        style={{ height: "440px" }}
       >
         {filtered.map((font) => (
           <div
             key={font}
             ref={font === value ? selectedRef : null}
             onClick={() => select(font)}
-            className={`px-2 py-1.5 text-sm cursor-pointer select-none transition-colors ${
+            className={`px-2 py-2 text-lg cursor-pointer select-none transition-colors ${
               font === value
                 ? "bg-blue-600 text-white"
                 : "text-gray-200 hover:bg-gray-700"

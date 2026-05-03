@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useZoom } from "../hooks/useZoom";
 import { type UnitPreference } from "../hooks/useSettings";
 
@@ -74,6 +74,13 @@ function buildGridSvg(svg: string, unit: UnitPreference = "mm"): string {
 export default function SvgPreview({ svgContent, onDownloadSvg, svgError, downloadingFont, unitPreference = "mm" }: SvgPreviewProps) {
   const { imgRef, scale } = useZoom();
   const [showGrid, setShowGrid] = useState(false);
+  const [fontVersion, setFontVersion] = useState(0);
+
+  useEffect(() => {
+    const handler = () => setFontVersion((v) => v + 1);
+    (document.fonts as EventTarget).addEventListener("loadingdone", handler);
+    return () => (document.fonts as EventTarget).removeEventListener("loadingdone", handler);
+  }, []);
 
   const displaySvg = useMemo(() => {
     if (!svgContent) return null;
@@ -82,13 +89,15 @@ export default function SvgPreview({ svgContent, onDownloadSvg, svgError, downlo
 
   // Inject CSS sizing so inline SVG is constrained by its container instead of
   // rendering at physical mm dimensions (which can be huge on high-DPI screens).
+  // fontVersion embedded as data attribute so React updates innerHTML in-place
+  // (no remount) when fonts finish loading, repainting SVG text correctly.
   const inlineSvg = useMemo(() => {
     if (!displaySvg) return null;
     return displaySvg.replace(
       /<svg /,
-      '<svg style="max-width:100%;max-height:calc(100vh - 6rem);height:auto;" '
+      `<svg data-fv="${fontVersion}" style="max-width:100%;max-height:calc(100vh - 6rem);height:auto;" `
     );
-  }, [displaySvg]);
+  }, [displaySvg, fontVersion]);
 
   return (
     <div className="flex-1 flex flex-col items-stretch bg-gray-300 relative overflow-hidden">
