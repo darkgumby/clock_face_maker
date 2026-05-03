@@ -7,6 +7,7 @@ const MM_PER_INCH = 25.4;
 interface SvgPreviewProps {
   svgContent: string | null;
   onDownloadSvg: () => void;
+  onDownloadPng: () => void;
   svgError: string | null;
   downloadingFont?: boolean;
   unitPreference?: UnitPreference;
@@ -71,7 +72,7 @@ function buildGridSvg(svg: string, unit: UnitPreference = "mm"): string {
     .replace(/(<svg[^>]*>)/, `$1\n${gridGroup}`);
 }
 
-export default function SvgPreview({ svgContent, onDownloadSvg, svgError, downloadingFont, unitPreference = "mm" }: SvgPreviewProps) {
+export default function SvgPreview({ svgContent, onDownloadSvg, onDownloadPng, svgError, downloadingFont, unitPreference = "mm" }: SvgPreviewProps) {
   const { imgRef, scale, zoomIn, zoomOut, resetZoom } = useZoom();
   const [showGrid, setShowGrid] = useState(false);
   const [fontVersion, setFontVersion] = useState(0);
@@ -147,7 +148,14 @@ export default function SvgPreview({ svgContent, onDownloadSvg, svgError, downlo
           disabled={!svgContent || !!svgError || downloadingFont}
           className="px-3 py-1.5 text-xs rounded bg-gray-700 hover:bg-gray-600 text-gray-200 disabled:opacity-40 transition-colors shadow-lg"
         >
-          {downloadingFont ? "Embedding font…" : "Download SVG"}
+          {downloadingFont ? "Embedding font…" : "SVG"}
+        </button>
+        <button
+          onClick={onDownloadPng}
+          disabled={!svgContent || !!svgError || downloadingFont}
+          className="px-3 py-1.5 text-xs rounded bg-gray-700 hover:bg-gray-600 text-gray-200 disabled:opacity-40 transition-colors shadow-lg"
+        >
+          {downloadingFont ? "Embedding font…" : "PNG"}
         </button>
       </div>
 

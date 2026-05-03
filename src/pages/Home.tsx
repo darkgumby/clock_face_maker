@@ -8,6 +8,7 @@ import CollapsiblePanel from "../components/CollapsiblePanel";
 import { generateSvg } from "../lib/generateSvg";
 import { embedGoogleFont } from "../lib/embedFont";
 import { convertTextToPaths, getRequiredChars } from "../lib/textToPath";
+import { svgToPng } from "../lib/exportPng";
 import { useProjects, type ProjectRecord } from "../hooks/useProjects";
 import { useSettings, UnitPreference } from "../hooks/useSettings";
 
@@ -199,6 +200,45 @@ export default function Home() {
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadPng = async () => {
+    if (!svgContent) return;
+    setDownloadingFont(true);
+    let finalSvg = svgContent;
+    if (params.show_numbers) {
+      const chars = getRequiredChars(params.number_roman, params.cardinal_numbers_only);
+      const withPaths = await convertTextToPaths(
+        svgContent,
+        params.number_font,
+        params.number_font_weight,
+        params.number_font_italic,
+        chars
+      );
+      if (withPaths !== svgContent) {
+        finalSvg = withPaths;
+      } else {
+        finalSvg = await embedGoogleFont(
+          svgContent,
+          params.number_font,
+          params.number_font_weight,
+          params.number_font_italic,
+          chars
+        );
+      }
+    }
+    setDownloadingFont(false);
+
+    const w = params.face_shape === "circle" ? params.diameter : params.face_width;
+    const h = params.face_shape === "circle" ? params.diameter : params.face_height;
+    const name = currentProject?.name ?? "clock";
+
+    try {
+      await svgToPng(finalSvg, w, h, `${name}.png`);
+    } catch (err) {
+      console.error("PNG Export Error:", err);
+      setSvgError("Failed to export PNG.");
+    }
+  };
+
   const allErrors = [projectsError, settingsError, svgError].filter(Boolean).join(" ");
 
   return (
@@ -218,6 +258,7 @@ export default function Home() {
       <SvgPreview
         svgContent={svgContent}
         onDownloadSvg={handleDownloadSvg}
+        onDownloadPng={handleDownloadPng}
         svgError={svgError}
         downloadingFont={downloadingFont}
         unitPreference={unitPreference}
