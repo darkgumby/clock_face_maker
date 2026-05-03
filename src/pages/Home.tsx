@@ -9,6 +9,7 @@ import { generateSvg } from "../lib/generateSvg";
 import { embedGoogleFont } from "../lib/embedFont";
 import { convertTextToPaths, getRequiredChars } from "../lib/textToPath";
 import { svgToPng } from "../lib/exportPng";
+import { GOOGLE_FONTS } from "../components/FontPicker";
 import { useProjects, type ProjectRecord } from "../hooks/useProjects";
 import { useSettings, UnitPreference } from "../hooks/useSettings";
 
@@ -28,7 +29,7 @@ const DEFAULT_PARAMS = {
   minute_mark_length: 8,
   minute_mark_width: 1,
   show_numbers: true,
-  number_font: "Abril Fatface",
+  number_font: GOOGLE_FONTS[0],
   number_size: 32,
   number_font_weight: 400,
   number_font_italic: false,
