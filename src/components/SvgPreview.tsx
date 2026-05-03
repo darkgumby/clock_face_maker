@@ -148,14 +148,14 @@ export default function SvgPreview({ svgContent, onDownloadSvg, onDownloadPng, s
           disabled={!svgContent || !!svgError || downloadingFont}
           className="px-3 py-1.5 text-xs rounded bg-gray-700 hover:bg-gray-600 text-gray-200 disabled:opacity-40 transition-colors shadow-lg"
         >
-          {downloadingFont ? "Embedding font…" : "SVG"}
+          {downloadingFont ? "Embedding font…" : "Export SVG"}
         </button>
         <button
           onClick={onDownloadPng}
           disabled={!svgContent || !!svgError || downloadingFont}
           className="px-3 py-1.5 text-xs rounded bg-gray-700 hover:bg-gray-600 text-gray-200 disabled:opacity-40 transition-colors shadow-lg"
         >
-          {downloadingFont ? "Embedding font…" : "PNG"}
+          {downloadingFont ? "Embedding font…" : "Export PNG"}
         </button>
       </div>
 
