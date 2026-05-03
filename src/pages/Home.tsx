@@ -79,6 +79,8 @@ export default function Home() {
 
   const [showInitModal, setShowInitModal] = useState(false);
   const [pendingInitProject, setPendingInitProject] = useState<ProjectRecord | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [params, setParams] = useState<Params>({ ...DEFAULT_PARAMS, number_font: defaultFont });
   const [svgError, setSvgError] = useState<string | null>(null);
   const [downloadingFont, setDownloadingFont] = useState(false);
@@ -250,11 +252,9 @@ export default function Home() {
   };
 
   const handleCreateProjectAction = async (name: string, description?: string) => {
-    console.log("Creating project:", name);
     setShowInitModal(true); // Set immediately to block auto-switching useEffects
     try {
       const newProject = await createProject(name, description);
-      console.log("Project created, showing modal for:", newProject.id);
       setPendingInitProject(newProject);
       return newProject;
     } catch (err) {
@@ -265,7 +265,6 @@ export default function Home() {
   };
 
   const handleInitChoice = (choice: "default" | "current") => {
-    console.log("Init choice:", choice, "for project:", pendingInitProject?.id);
     if (!pendingInitProject) {
       setShowInitModal(false);
       return;
@@ -278,6 +277,19 @@ export default function Home() {
     handleSelectProject(pendingInitProject);
     setShowInitModal(false);
     setPendingInitProject(null);
+  };
+
+  const handleDeleteRequest = async (id: string) => {
+    setProjectToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    if (projectToDelete) {
+      deleteProject(projectToDelete);
+      setProjectToDelete(null);
+      setShowDeleteModal(false);
+    }
   };
 
   const allErrors = [projectsError, settingsError, svgError].filter(Boolean).join(" ");
@@ -303,6 +315,25 @@ export default function Home() {
         </div>
       )}
 
+      {showDeleteModal && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-gray-800 p-6 rounded-lg shadow-2xl border border-gray-700 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-semibold mb-2">Delete Project?</h3>
+            <p className="text-gray-400 text-sm mb-6">
+              This will permanently remove the project and all its snapshots. This action cannot be undone.
+            </p>
+            <div className="flex flex-col gap-y-2">
+              <Button onClick={confirmDelete} variant="danger" className="w-full py-2">
+                Delete Project
+              </Button>
+              <Button onClick={() => setShowDeleteModal(false)} variant="secondary" className="w-full py-2">
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <CollapsiblePanel title="Projects" borderSide="left">
         <ProjectSidebar
           projects={projects}
@@ -310,7 +341,7 @@ export default function Home() {
           currentProject={currentProject}
           onSelect={handleSelectProject}
           onCreate={handleCreateProjectAction}
-          onDelete={deleteProject}
+          onDelete={handleDeleteRequest}
           projectsError={projectsError}
         />
       </CollapsiblePanel>
