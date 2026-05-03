@@ -2,6 +2,8 @@
 
 A parametric clock face designer that outputs SVG files, with project management.
 
+**Live app:** https://darkgumby.github.io/clock_face_maker/
+
 ## Features
 
 - **Parametric Design:** Adjust diameter, colors, border, mark lengths, font, and number style.
