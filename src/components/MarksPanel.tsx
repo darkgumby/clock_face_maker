@@ -69,15 +69,6 @@ const MarksPanel: FC<MarksPanelProps> = ({ params, onChange, unitPreference }) =
             onChange={(v) => onChange({ cardinal_numbers_only: v })}
           />
         )}
-        {params.show_numbers && (
-          <UnitInputRange
-            label="Gap to Marks"
-            value={params.number_mark_gap}
-            onChange={(v) => onChange({ number_mark_gap: v })}
-            minMm={-10} maxMm={40} stepMm={1}
-            unit={unitPreference}
-          />
-        )}
       </div>
 
       <div className="flex flex-col gap-y-2">
@@ -94,6 +85,15 @@ const MarksPanel: FC<MarksPanelProps> = ({ params, onChange, unitPreference }) =
           minMm={0} maxMm={20} stepMm={0.5}
           unit={unitPreference}
         />
+        {params.show_numbers && (
+          <UnitInputRange
+            label="Gap to Marks"
+            value={params.number_mark_gap}
+            onChange={(v) => onChange({ number_mark_gap: v })}
+            minMm={-10} maxMm={40} stepMm={1}
+            unit={unitPreference}
+          />
+        )}
         <UnitInputRange
           label="Hour Mark Length"
           value={params.hour_mark_length}
