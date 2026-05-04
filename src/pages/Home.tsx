@@ -6,6 +6,7 @@ import ProjectSidebar from "../components/ProjectSidebar";
 import SvgPreview from "../components/SvgPreview";
 import CollapsiblePanel from "../components/CollapsiblePanel";
 import Button from "../components/Button";
+import HelpDialog from "../components/HelpDialog";
 import { generateSvg } from "../lib/generateSvg";
 import { embedGoogleFont } from "../lib/embedFont";
 import { convertTextToPaths, getRequiredChars } from "../lib/textToPath";
@@ -81,6 +82,7 @@ export default function Home() {
   const [pendingInitProject, setPendingInitProject] = useState<ProjectRecord | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
   const [params, setParams] = useState<Params>({ ...DEFAULT_PARAMS, number_font: defaultFont });
   const [svgError, setSvgError] = useState<string | null>(null);
   const [downloadingFont, setDownloadingFont] = useState(false);
@@ -95,13 +97,13 @@ export default function Home() {
   const svgContent = useMemo(() => {
     try {
       setSvgError(null);
-      return generateSvg(params);
+      return generateSvg({ ...params, unit_preference: unitPreference });
     } catch (error) {
       console.error("SVG Generation Error:", error);
       setSvgError("Failed to generate SVG.");
       return null;
     }
-  }, [params]);
+  }, [params, unitPreference]);
 
   useEffect(() => {
     if (!projectsLoading && !settingsLoading && projects !== null) {
@@ -264,17 +266,26 @@ export default function Home() {
     }
   };
 
+  const handleInitCancel = () => {
+    if (pendingInitProject) {
+      deleteProject(pendingInitProject.id);
+    }
+    setShowInitModal(false);
+    setPendingInitProject(null);
+  };
+
   const handleInitChoice = (choice: "default" | "current") => {
     if (!pendingInitProject) {
       setShowInitModal(false);
       return;
     }
-    
-    if (choice === "current") {
-      updateProjectParams(pendingInitProject.id, params);
-    }
-    
-    handleSelectProject(pendingInitProject);
+
+    const initParams = choice === "default" ? { ...DEFAULT_PARAMS } : params;
+
+    setParams(initParams);
+    updateProjectParams(pendingInitProject.id, initParams);
+    const projectWithParams = { ...pendingInitProject, params: initParams };
+    handleSelectProject(projectWithParams as typeof pendingInitProject);
     setShowInitModal(false);
     setPendingInitProject(null);
   };
@@ -309,6 +320,9 @@ export default function Home() {
               </Button>
               <Button onClick={() => handleInitChoice("current")} variant="secondary" className="w-full py-2">
                 Keep Current Settings
+              </Button>
+              <Button onClick={handleInitCancel} variant="secondary" className="w-full py-2 opacity-60 hover:opacity-100">
+                Cancel
               </Button>
             </div>
           </div>
@@ -353,7 +367,10 @@ export default function Home() {
         svgError={svgError}
         downloadingFont={downloadingFont}
         unitPreference={unitPreference}
+        onHelp={() => setShowHelp(true)}
       />
+
+      {showHelp && <HelpDialog onClose={() => setShowHelp(false)} />}
 
       <CollapsiblePanel title="Face" borderSide="right">
         <ParameterPanel

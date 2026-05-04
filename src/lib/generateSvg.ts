@@ -1,4 +1,5 @@
 const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+const MM_PER_INCH = 25.4;
 
 export type FaceShape = "circle" | "square" | "rounded_square";
 export type MarkStyle = "line" | "circle" | "square" | "diamond";
@@ -78,6 +79,7 @@ interface SvgParams {
   minute_mark_diamond_height?: number;
   laser_mode?: boolean;
   show_crosshair?: boolean;
+  unit_preference?: "mm" | "in";
 }
 
 export function generateSvg(params: SvgParams): string {
@@ -242,5 +244,9 @@ export function generateSvg(params: SvgParams): string {
     ...(crosshairEls.length ? [`<g id="crosshair">\n${crosshairEls.join("\n")}\n</g>`] : []),
   ];
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}mm" height="${svgHeight}mm" viewBox="0 0 ${svgWidth} ${svgHeight}">\n${groups.join("\n")}\n</svg>`;
+  const unitPref = params.unit_preference ?? "mm";
+  const widthAttr = unitPref === "in" ? `${(svgWidth / MM_PER_INCH).toFixed(4)}in` : `${svgWidth}mm`;
+  const heightAttr = unitPref === "in" ? `${(svgHeight / MM_PER_INCH).toFixed(4)}in` : `${svgHeight}mm`;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" inkscape:document-units="${unitPref}" width="${widthAttr}" height="${heightAttr}" viewBox="0 0 ${svgWidth} ${svgHeight}">\n${groups.join("\n")}\n</svg>`;
 }

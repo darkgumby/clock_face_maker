@@ -31,7 +31,7 @@ A parametric clock face designer that outputs SVG files, with project management
 
 Downloaded SVGs are production-ready for laser, CNC, and design workflows:
 
-- **Real-world units** — `width`/`height` in `mm` on the SVG root so tools like LightBurn, Inkscape, and Fusion 360 import at the correct physical size without rescaling
+- **Real-world units** — `width`/`height` on the SVG root match the chosen unit system (`mm` or `in`); `inkscape:document-units` is also set so Inkscape opens the file in the correct unit without rescaling. Tools like LightBurn and Fusion 360 also read the physical dimensions correctly.
 - **Named layer groups** — elements wrapped in `<g id="face">`, `<g id="hour-marks">`, `<g id="minute-marks">`, `<g id="numbers">`, `<g id="center">`, `<g id="crosshair">` for easy per-layer operation assignment
 - **Text as paths** — numbers are converted to vector paths at download time using the actual font geometry; no font dependency in the exported file
 - **Font subsetting** — only the glyphs used on the face are fetched, keeping file size small; falls back to embedded font if path conversion fails

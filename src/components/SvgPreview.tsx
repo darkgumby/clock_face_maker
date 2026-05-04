@@ -9,9 +9,10 @@ interface SvgPreviewProps {
   svgError: string | null;
   downloadingFont?: boolean;
   unitPreference?: UnitPreference;
+  onHelp?: () => void;
 }
 
-export default function SvgPreview({ svgContent, onDownloadSvg, onDownloadPng, svgError, downloadingFont, unitPreference = "mm" }: SvgPreviewProps) {
+export default function SvgPreview({ svgContent, onDownloadSvg, onDownloadPng, svgError, downloadingFont, unitPreference = "mm", onHelp }: SvgPreviewProps) {
   const { imgRef, scale, zoomIn, zoomOut, resetZoom } = useZoom();
   const [fontVersion, setFontVersion] = useState(0);
 
@@ -83,6 +84,14 @@ export default function SvgPreview({ svgContent, onDownloadSvg, onDownloadPng, s
         >
           {downloadingFont ? "Embedding font…" : "Export PNG"}
         </button>
+        {onHelp && (
+          <button
+            onClick={onHelp}
+            className="px-3 py-1.5 text-xs rounded bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors shadow-lg"
+          >
+            Help
+          </button>
+        )}
       </div>
 
       {/* Preview area */}
